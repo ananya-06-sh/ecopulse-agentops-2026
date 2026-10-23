@@ -1,0 +1,16 @@
+[
+  {
+    "id":"STEEL-101","name":"Steel for Bengaluru plant","material":"steel","quantity_t":100,"buyer_country":"India","destination":"India","max_days":16,"budget_lakh":64,"internal_carbon_price_inr_t":4000,"required_boundary":"cradle-to-gate","suppliers":[
+      {"id":"S-A","name":"Ironcrest Metals","quote_lakh":60,"lead_days":12,"emissions":240,"emission_unit":"tCO2e","boundary":"cradle-to-gate","evidence_date":"2026-08-12","source":"Supplier declaration A-42","ship_from":"India"},
+      {"id":"S-B","name":"GreenForge Steel","quote_lakh":62.5,"lead_days":18,"emissions":150,"emission_unit":"tCO2e","boundary":"cradle-to-gate","evidence_date":"2026-09-10","source":"Supplier EPD B-19","ship_from":"India"},
+      {"id":"S-C","name":"SwiftSteel Traders","quote_lakh":58,"lead_days":10,"emissions":null,"emission_unit":"tCO2e","boundary":"cradle-to-gate","evidence_date":"","source":"","ship_from":"India"}
+    ]
+  },
+  {
+    "id":"AL-204","name":"Aluminium components for EU delivery","material":"aluminium","quantity_t":40,"buyer_country":"India","destination":"EU","max_days":21,"budget_lakh":45,"internal_carbon_price_inr_t":4000,"required_boundary":"cradle-to-gate","suppliers":[
+      {"id":"A-D","name":"Nova Alloy","quote_lakh":42,"lead_days":16,"emissions":520000,"emission_unit":"kgCO2e","boundary":"cradle-to-gate","evidence_date":"2026-09-01","source":"EPD-D-11","ship_from":"India"},
+      {"id":"A-E","name":"ReLoop Aluminium","quote_lakh":43,"lead_days":19,"emissions":310,"emission_unit":"tCO2e","boundary":"gate-to-gate","evidence_date":"2026-09-18","source":"Vendor sheet E-4","ship_from":"India"},
+      {"id":"A-F","name":"CircularMet","quote_lakh":44,"lead_days":20,"emissions":360,"emission_unit":"tCO2e","boundary":"cradle-to-gate","evidence_date":"2026-08-25","source":"EPD-F-3","ship_from":"India"}
+    ]
+  }
+]

@@ -2,6 +2,8 @@
 
 A local procurement decision agent for **Manufacturing**. It ingests an order and supplier offers, checks delivery/price and carbon evidence, screens rule relevance, ranks comparable offers, drafts a purchase order, and records a human decision. Gemini can also draft structured fields from a pasted supplier email or certificate text; a human confirms them before they enter the order. **All supplied quotes and footprints are synthetic.** The internal carbon price is a planning assumption, not a tax or predicted fine.
 
+The dashboard offers steel, aluminium, and an editable custom scenario. It shows supplier exclusions, a price/emissions plot of eligible offers, a carbon-intensity cap in kgCO₂e per tonne of purchased material, a manager approval control, and a local audit record. It accepts pasted text or a `.txt`/`.csv` evidence file; **PDF upload is not implemented**. AI extraction is always a draft requiring human confirmation.
+
 ## Run in under two minutes
 
 Requires Python 3.10+; no Python packages to install.
@@ -33,7 +35,7 @@ An API account with credits and network access is required. The key is read on t
 4. **Second case:** AL-204 converts Nova's `520000 kgCO2e` to `520 tCO₂e`, excludes ReLoop's boundary mismatch, and flags potential EU CBAM scope for expert review. CircularMet is eligible and selected. The steel/India order does **not** flag EU CBAM.
 5. **Human control:** Show draft, manager approve/reject, audit record. It never sends a purchase order.
 6. **Unstructured evidence:** Click **Load sample note**, then **Extract fields with Gemini**. Review the draft values, confirm the new offer, and rerun the agent. This step requires a working Gemini API key; it never adds an offer automatically.
-7. **Persistent record:** Click **Open readable decision report** after approval. It opens a one-page browser report with **Print or save as PDF**. The decision and audit remain available after a server restart in `data/ecopulse.sqlite3` (local demo only; do not commit the database).
+7. **Persistent record:** Click **Open decision report** after approval. It opens a readable browser report with **Print or save as PDF**. The decision and audit remain available after a server restart in `data/ecopulse.sqlite3` (local demo only; do not commit the database).
 
 ## Architecture and governance
 
@@ -62,6 +64,8 @@ The tests cover reranking on updated lead time, unit normalization, scope checks
 For the synthetic steel order, the recommendation shifts from 240 to 150 tCO₂e after the delivery update. The quote premium is ₹2.5 lakh; 90 tCO₂e is a **scenario comparison**, not verified abatement. Reuse the same workflow for multiple materials, sites, suppliers, and rule cards. A production pilot would measure decision time, evidence completeness, exceptions, realized purchase cost, and verified emissions versus a baseline over many orders.
 
 The UI reports evidence completeness, eligible offers, and elapsed evaluation time for each run. This is measured prototype output, not a claim of time saved. Rule cards are configuration in `data/rules.json`; editing them still requires policy-owner review and testing before production use.
+
+The editable manual-time figure in the UI defaults to 45 minutes as an **illustrative baseline input**, not a measured result. Evaluation time excludes human review. Never infer a realized ROI from those two numbers alone.
 
 ## Hackathon handoff
 

@@ -21,6 +21,8 @@ def tool_validate_order(order):
     if not order.get("id") or not order.get("material") or not order.get("suppliers"): raise ValueError("Order ID, material, and suppliers required")
     for field in ("quantity_t","max_days","budget_lakh","internal_carbon_price_inr_t"):
         number(order.get(field), field)
+    if order.get("max_carbon_intensity_kg_t") not in (None, ""):
+        number(order["max_carbon_intensity_kg_t"], "carbon intensity limit")
     if number(order["quantity_t"],"quantity") == 0: raise ValueError("Quantity must exceed zero")
     ids = [str(s.get("id", "")) for s in order["suppliers"]]
     if any(not i for i in ids) or len(set(ids)) != len(ids): raise ValueError("Supplier IDs must be unique and present")
@@ -31,6 +33,9 @@ def tool_screen_rules(order):
 
 def tool_normalize_and_check(order):
     rows=[]
+    quantity=number(order["quantity_t"],"quantity")
+    carbon_limit=(number(order["max_carbon_intensity_kg_t"],"carbon intensity limit")
+                  if order.get("max_carbon_intensity_kg_t") not in (None, "") else None)
     for s in order["suppliers"]:
         issues=[]; emissions_t=None
         q=number(s.get("quote_lakh"),"supplier quote")
@@ -50,10 +55,12 @@ def tool_normalize_and_check(order):
                 if age < 0 or age > 365: issues.append("Emission evidence outside valid date window")
             except ValueError: issues.append("Missing or invalid evidence date")
             if s.get("boundary") != order.get("required_boundary","cradle-to-gate"): issues.append("Incomparable footprint boundary")
+            if emissions_t is not None and carbon_limit is not None and emissions_t*Decimal(1000)/quantity > carbon_limit:
+                issues.append("Exceeds carbon intensity limit")
         commercial_ok=not any(i in issues for i in ("Over quote budget","Misses delivery deadline"))
-        carbon_ok=emissions_t is not None and not any(i in issues for i in ("Missing emissions evidence","Unknown emissions unit","Missing source reference","Emission evidence outside valid date window","Missing or invalid evidence date","Incomparable footprint boundary"))
+        carbon_ok=emissions_t is not None and not any(i in issues for i in ("Missing emissions evidence","Unknown emissions unit","Missing source reference","Emission evidence outside valid date window","Missing or invalid evidence date","Incomparable footprint boundary","Exceeds carbon intensity limit"))
         score=q+emissions_t*number(order["internal_carbon_price_inr_t"],"carbon price")/Decimal(100000) if carbon_ok else None
-        rows.append({"id":s["id"],"name":s.get("name",s["id"]),"quote_lakh":float(q),"lead_days":float(lead),"emissions_t":float(emissions_t) if emissions_t is not None else None,"boundary":s.get("boundary"),"source":s.get("source"),"evidence_date":s.get("evidence_date"),"ship_from":s.get("ship_from"),"commercial_ok":commercial_ok,"carbon_ok":carbon_ok,"issues":issues,"planning_score_lakh":round(float(score),2) if score is not None else None})
+        rows.append({"id":s["id"],"name":s.get("name",s["id"]),"quote_lakh":float(q),"lead_days":float(lead),"emissions_t":float(emissions_t) if emissions_t is not None else None,"carbon_intensity_kg_t":round(float(emissions_t*Decimal(1000)/quantity),2) if emissions_t is not None else None,"boundary":s.get("boundary"),"source":s.get("source"),"evidence_date":s.get("evidence_date"),"ship_from":s.get("ship_from"),"commercial_ok":commercial_ok,"carbon_ok":carbon_ok,"issues":issues,"planning_score_lakh":round(float(score),2) if score is not None else None})
     return rows
 
 def tool_rank_and_draft(order, rows, rules):

@@ -1,44 +1,2152 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>EcoPulse Enterprise · Procurement Agent</title><style>
-:root{font-family:Inter,system-ui,Arial,sans-serif;color:#152b27;background:#edf4ef}*{box-sizing:border-box}body{margin:0}header{background:#0e302b;color:white;padding:18px max(24px,calc((100vw - 1320px)/2));display:flex;justify-content:space-between;align-items:center}.brand{font-size:24px;font-weight:800;letter-spacing:-.04em}.brand b{color:#8eecb4}.pill{font-size:12px;background:#1d5447;padding:7px 12px;border-radius:20px}main{max-width:1320px;margin:auto;padding:28px 24px 60px}.hero{display:flex;justify-content:space-between;align-items:end;gap:20px}.hero h1{font-size:38px;margin:0 0 8px;letter-spacing:-.055em}.muted{color:#637a70;font-size:14px}.hero p{margin:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.card{background:white;border:1px solid #d8e7dc;border-radius:17px;padding:20px;box-shadow:0 6px 28px #174b3210}.card h2{margin:0 0 14px;font-size:18px}.span{grid-column:1/-1}label{font-size:12px;font-weight:700;color:#496257;display:block;margin:9px 0 5px}input,select,textarea{font:inherit;border:1px solid #c9d9ce;border-radius:9px;padding:9px;color:#18352d;background:#fff;width:100%}input:focus,select:focus,textarea:focus{outline:2px solid #56bb82}.row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.row.six{grid-template-columns:repeat(6,1fr)}button{border:0;border-radius:9px;background:#126347;color:white;padding:11px 15px;font-weight:700;cursor:pointer}button:hover{background:#0b5039}button.secondary{background:#e5f2e9;color:#165b41}button.warn{background:#a75036}button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:11px 9px;border-bottom:1px solid #e8eee9;text-align:left;vertical-align:top}th{color:#64796e;font-size:11px;text-transform:uppercase;letter-spacing:.07em}td input{min-width:90px;padding:7px}#suppliers td:nth-child(1) input,#suppliers td:nth-child(8) input,#suppliers td:nth-child(9) input{min-width:165px}#suppliers td:nth-child(2) input,#suppliers td:nth-child(3) input,#suppliers td:nth-child(4) input{min-width:70px}#suppliers td:nth-child(7) input{min-width:120px}td select{min-width:105px;padding:7px}.good{color:#16754c;font-weight:700}.bad{color:#aa4f36;font-weight:700}.tag{display:inline-block;padding:4px 8px;border-radius:6px;background:#e4f1e7;color:#245e43;font-size:12px;margin:3px}.tag.red{background:#fff0e9;color:#a34e35}.score{font-size:34px;font-weight:800;letter-spacing:-.05em;margin:7px 0}.callout{background:#eff8f1;border-left:4px solid #25aa67;padding:12px 15px;border-radius:5px;margin:12px 0}.caution{background:#fff4e9;border-left-color:#c27930}.trace{line-height:1.5}.checklist{list-style:none;padding:0;margin:14px 0}.checklist li{border-left:3px solid #57b77e;padding:9px 13px;margin:9px 0;background:#f4faf5}.trace pre{max-height:300px;overflow:auto}details{border-bottom:1px solid #e4ede7;padding:9px 0}summary{cursor:pointer;font-weight:700}pre{white-space:pre-wrap;word-break:break-word;background:#f6faf7;padding:12px;border-radius:8px;font-size:11px}.hidden{display:none}footer{color:#657b70;text-align:center;padding:16px;font-size:12px}@media(max-width:850px){.grid{grid-template-columns:1fr}.row,.row.six{grid-template-columns:repeat(2,1fr)}.hero{display:block}}
-</style></head><body><header><div class="brand">eco<b>pulse</b><small style="font-size:12px;font-weight:400;display:block;letter-spacing:0">ENTERPRISE · PROCUREMENT INTELLIGENCE</small></div><span class="pill">AGENTOPS 2026 · MANUFACTURING</span></header><main><div class="hero"><div><h1>From supplier change to approved decision.</h1><p class="muted">One order. Messy evidence. A traceable recommendation that a manager can challenge.</p></div><span class="pill" style="background:#d5eadd;color:#245c3d">Synthetic sandbox · No orders transmitted</span></div>
-<div class="grid"><section class="card span"><h2>01 / Set the procurement context</h2><div class="row"><div><label>Scenario</label><select id="scenario"></select></div><div><label>Order ID</label><input id="orderId"></div><div><label>Material</label><input id="material"></div><div><label>Destination</label><select id="destination"><option>India</option><option>EU</option></select></div></div><div class="row"><div><label>Quantity · tonnes</label><input id="quantity" type="number" min="1"></div><div><label>Maximum delivery · days</label><input id="deadline" type="number" min="0"></div><div><label>Quote budget · ₹ lakh</label><input id="budget" type="number" min="0" step="0.1"></div><div><label>Internal carbon price · ₹/tCO₂e</label><input id="carbon" type="number" min="0"></div></div><div class="actions"><button class="secondary" id="update">Apply live update: GreenForge 18 → 14 days</button><span class="muted">Edit any cell to test a new case. Quote and carbon data are illustrative.</span></div></section>
-<section class="card span"><h2>02 / Inspect incoming supplier offers</h2><div class="tablewrap"><table><thead><tr><th>Supplier / ID</th><th>Quote ₹ lakh</th><th>Days</th><th>Footprint</th><th>Unit</th><th>Boundary</th><th>Evidence date</th><th>Source</th><th></th></tr></thead><tbody id="suppliers"></tbody></table></div><div class="actions"><button class="secondary" id="add">+ Add supplier</button><label style="margin:0"><input id="model" type="checkbox" checked style="width:auto"> Use model tool calls when API key is configured</label><button id="evaluate">Run agent →</button><span id="status" class="muted"></span></div></section>
-<section class="card span"><h2>03 / Read a supplier note with AI</h2><p class="muted">Paste a supplier email or certificate text. Gemini drafts fields; you check them before adding an offer.</p><textarea id="supplierNote" rows="3" placeholder="Paste synthetic supplier quote and emissions evidence here"></textarea><div class="actions"><button class="secondary" id="sampleNote">Load sample note</button><button id="extract">Extract fields with Gemini</button><span id="extractStatus" class="muted"></span></div><div id="extractPreview" class="hidden"><p class="callout caution">AI draft only. Check each value against the note. Blank or uncertain fields need your review.</p><div id="extractedFields" class="row six"></div><p id="extractWarnings" class="muted"></p><button id="confirmOffer">Add confirmed offer to table</button></div></section>
-<section id="result" class="card hidden"><h2>04 / Decision and business impact</h2><div id="decision"></div></section><section id="governance" class="card hidden"><h2>05 / Governance and manager sign-off</h2><div id="gov"></div></section><section id="tableCard" class="card span hidden"><h2>Offer by offer · evidence and trade-offs</h2><div class="tablewrap"><table><thead><tr><th>Supplier</th><th>Quote</th><th>Lead</th><th>Normalized footprint</th><th>Planning score</th><th>Checks</th></tr></thead><tbody id="resultsTable"></tbody></table></div></section><section id="traceCard" class="card span hidden"><h2>How EcoPulse checked this decision</h2><p class="muted">Four checks lead to the recommendation. Open technical details only if you need to audit the tool output.</p><div id="trace" class="trace"></div></section></div></main><footer>EcoPulse · Student prototype · Scenario figures and supplier names are synthetic · No tax advice or live ERP integration</footer>
-<script>
-let fixtures=[], current=null, report=null; const $=id=>document.getElementById(id); const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fields=['name','id','quote_lakh','lead_days','emissions','emission_unit','boundary','evidence_date','source'];
-function renderOrder(o){current=structuredClone(o);$('orderId').value=o.id;$('material').value=o.material;$('destination').value=o.destination;$('quantity').value=o.quantity_t;$('deadline').value=o.max_days;$('budget').value=o.budget_lakh;$('carbon').value=o.internal_carbon_price_inr_t;renderSuppliers()}
-function renderSuppliers(){ $('suppliers').innerHTML=current.suppliers.map((s,i)=>`<tr>${fields.map(k=>`<td><input data-i="${i}" data-key="${k}" value="${escape(s[k]??'')}"></td>`).join('')}<td><button class="secondary" data-remove="${i}">×</button></td></tr>`).join(''); document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{current.suppliers.splice(+b.dataset.remove,1);renderSuppliers()})}
-function collect(){let o=structuredClone(current);o.id=$('orderId').value;o.material=$('material').value;o.destination=$('destination').value;o.quantity_t=+$('quantity').value;o.max_days=+$('deadline').value;o.budget_lakh=+$('budget').value;o.internal_carbon_price_inr_t=+$('carbon').value;document.querySelectorAll('[data-key]').forEach(el=>{let s=o.suppliers[+el.dataset.i], k=el.dataset.key; s[k]=['quote_lakh','lead_days','emissions'].includes(k)?(el.value===''?null:Number(el.value)):el.value});return o}
-$('scenario').onchange=()=>renderOrder(fixtures[+$('scenario').value]);$('add').onclick=()=>{current=collect();current.suppliers.push({name:'New supplier',id:'N-'+(current.suppliers.length+1),quote_lakh:0,lead_days:0,emissions:null,emission_unit:'tCO2e',boundary:'cradle-to-gate',evidence_date:'',source:'',ship_from:'India'});renderSuppliers()};$('update').onclick=()=>{current=collect();let s=current.suppliers.find(x=>x.id==='S-B');if(s){s.lead_days=14;renderSuppliers();$('status').textContent='New delivery promise received: S-B now 14 days. Rerun evaluation.'}else $('status').textContent='Switch to steel scenario for this update.'};
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EcoPulse Enterprise | Procurement Decisions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cgi-navy:#091224;
+  --cgi-navy-surface:#101d36;
+  --cgi-navy-card:#152442;
+  --cgi-navy-border:#203358;
+  --cgi-red:#e02424;
+  --cgi-red-light:#fef2f2;
+  --em:#059669;
+  --em-d:#047857;
+  --em-l:#10b981;
+  --em-surface:#ecfdf5;
+  --em-border:#a7f3d0;
+  --amber:#d97706;
+  --amber-surface:#fffbeb;
+  --amber-border:#fde68a;
+  --blue:#2563eb;
+  --blue-surface:#eff6ff;
+  --blue-border:#bfdbfe;
+  --violet:#7c3aed;
+  --violet-surface:#f5f3ff;
+  --violet-border:#ddd6fe;
+  --canvas:#f8fafc;
+  --card-bg:#ffffff;
+  --ink:#0f172a;
+  --ink-secondary:#334155;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --line-strong:#cbd5e1;
+  --shadow-sm:0 1px 2px rgba(15,23,42,0.05);
+  --shadow-md:0 4px 14px rgba(15,23,42,0.07),0 1px 3px rgba(15,23,42,0.04);
+  --shadow-lg:0 10px 25px -3px rgba(15,23,42,0.09),0 4px 6px -2px rgba(15,23,42,0.04);
+  --font-sans:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:var(--font-sans);
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--ink);
+  background:var(--canvas);
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit}
 
-const extractKeys=['name','id','quote_lakh','lead_days','emissions','emission_unit','boundary','evidence_date','source','ship_from'];
-$('sampleNote').onclick=()=>{$('supplierNote').value='Supplier email from RenewMetal India (ID S-D) for order STEEL-101: total quote ₹61 lakh for 100 tonnes of steel, delivery in 13 days. Our cradle-to-gate product footprint is 180 tCO2e according to EPD-RM-26 dated 2026-09-30. Ships from India.'};
-$('extract').onclick=async()=>{let note=$('supplierNote').value.trim();$('extractStatus').textContent='Reading supplier note…';$('extractPreview').classList.add('hidden');$('extract').disabled=true;try{let res=await fetch('/api/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:note})});let d=await res.json();if(!res.ok)throw Error(d.error);$('extractedFields').innerHTML=extractKeys.map(k=>`<div><label>${escape(k.replaceAll('_',' '))}</label><input data-extract="${k}" value="${escape(d.candidate[k]??'')}"></div>`).join('');$('extractWarnings').textContent=d.needs_review.length?'Needs review: '+d.needs_review.join(', '):'All fields were found. Verify them against the note before confirming.';$('extractPreview').classList.remove('hidden');$('extractStatus').textContent='Draft fields extracted · human confirmation required'}catch(e){$('extractStatus').textContent='Error: '+e.message}finally{$('extract').disabled=false}};
-$('confirmOffer').onclick=()=>{let offer={};document.querySelectorAll('[data-extract]').forEach(el=>{let k=el.dataset.extract;offer[k]=['quote_lakh','lead_days','emissions'].includes(k)?(el.value.trim()===''?null:Number(el.value)):el.value.trim()});current=collect();if(!offer.id||current.suppliers.some(x=>x.id===offer.id)){$('extractStatus').textContent='Enter a unique supplier ID before adding.';return}current.suppliers.push(offer);renderSuppliers();$('extractStatus').textContent='Offer added for review. Run agent to check eligibility.';$('extractPreview').classList.add('hidden')};
-$('evaluate').onclick=async()=>{let o=collect();$('status').textContent='Evaluating…';$('evaluate').disabled=true;try{let res=await fetch('/api/evaluate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order:o,use_model:$('model').checked})});let data=await res.json();if(!res.ok)throw Error(data.error);report=data;show(data);$('status').textContent='Decision '+data.decision_id+' · '+(data.mode==='gemini_tool_calls'?'LIVE GEMINI TOOL CALLS':data.mode==='model_tool_calls'?'LIVE OPENAI TOOL CALLS':'RULES PREVIEW')}catch(e){$('status').textContent='Error: '+e.message}finally{$('evaluate').disabled=false}};
-function show(r){['result','governance','tableCard','traceCard'].forEach(x=>$(x).classList.remove('hidden'));let s=r.selected, d=r.comparison;$('decision').innerHTML=s?`<div class="muted">RECOMMENDATION · DRAFT ONLY</div><div class="score">${escape(s.name)}</div><p>₹${s.quote_lakh} lakh · ${s.lead_days} days · ${s.emissions_t} tCO₂e</p><div class="callout">${escape(r.explanation)}</div>${d?`<p>Against ${escape(d.vs)}: quote ${d.quote_difference_lakh>=0?'+':''}₹${d.quote_difference_lakh} lakh; emissions ${d.emission_difference_t>=0?'+':''}${d.emission_difference_t} tCO₂e.</p>`:''}<p><b>Planning score:</b> ₹${s.planning_score_lakh} lakh = quote + emissions × ₹${r.assumptions.internal_carbon_price_inr_t}/tCO₂e. Internal comparison only.</p>`:`<div class="callout caution"><b>Evidence needed.</b> ${escape(r.explanation)}</div>`;
-let evidenceCount=r.suppliers.filter(x=>x.carbon_ok).length,eligibleCount=r.suppliers.filter(x=>x.carbon_ok&&x.commercial_ok).length;
-$('decision').insertAdjacentHTML('beforeend',`<div class="callout"><b>Measured in this run:</b> ${evidenceCount}/${r.suppliers.length} offers have comparable evidence; ${eligibleCount} ${eligibleCount===1?'meets':'meet'} every check; evaluation ${Number(r.run_seconds??0).toFixed(2)} s. <small>Time saved and real emissions require a client pilot.</small></div>`);
-$('gov').innerHTML=`<p><b>External rule check:</b> ${r.rules.find(x=>x.id==='EU-CBAM-SCOPE')?.relevant?'EU carbon rule scope flagged for expert review.':'EU carbon rule scope is out of scope for this destination.'}</p><p class="muted">Internal carbon price ₹${r.assumptions.internal_carbon_price_inr_t}/tCO₂e is a planning assumption, not a tax. The app does not calculate legal liability.</p><p><b>PO state:</b> <span id="poState">${s?'Draft pending manager approval':'No draft generated'}</span></p><label>Manager note</label><input id="note" placeholder="Optional rationale"><div class="actions"><button id="approve" ${s?'':'disabled'}>Approve draft</button><button class="warn" id="reject">Reject / request revision</button><button class="secondary" id="exportRecord">Open readable decision report</button><span id="approvalState" class="muted"></span></div><p class="muted">Manager role is simulated, without secure login. No PO is transmitted.</p>`;
-$('approve').onclick=()=>decision('approve');$('reject').onclick=()=>decision('reject');$('exportRecord').onclick=openReport;$('resultsTable').innerHTML=r.suppliers.map(x=>`<tr><td><b>${escape(x.name)}</b><br><small>${escape(x.id)}</small></td><td>₹${x.quote_lakh} lakh</td><td>${x.lead_days} d</td><td>${x.emissions_t??'—'} tCO₂e<br><small>${escape(x.source||'No source')}</small></td><td>${x.planning_score_lakh===null?'—':'₹'+x.planning_score_lakh+' lakh'}</td><td>${x.issues.length?x.issues.map(a=>`<span class="tag red">${escape(a)}</span>`).join(''):'<span class="tag">Eligible</span>'}</td></tr>`).join('');$('trace').innerHTML=managerTrace(r)}
-function managerTrace(r){
- const selected=r.selected, eu=r.rules.find(x=>x.id==='EU-CBAM-SCOPE');
- const comparable=r.suppliers.filter(x=>x.carbon_ok).length;
- const eligible=r.suppliers.filter(x=>x.carbon_ok&&x.commercial_ok).length;
- const exceptions=r.suppliers.filter(x=>x.issues.length).map(x=>`${x.name}: ${x.issues.join(', ')}`);
- const steps=[
-  ['Order validated',`${r.validation.supplier_count} supplier offers received for ${r.input_order?.material??'this order'}. Budget and delivery limits checked.`],
-  ['Rule relevance checked',eu?.relevant?'EU carbon rule scope flagged for expert review.':`EU carbon rule not flagged for this ${r.input_order?.destination??'non-EU'} destination.`],
-  ['Evidence compared',`${comparable} of ${r.suppliers.length} offers have comparable emissions evidence. ${exceptions.length?exceptions.join('; '):'No evidence exceptions.'}`],
-  ['Action prepared',selected?(eligible===1?`${selected.name} is the only fully eligible offer. A draft awaits manager approval.`:`${selected.name} has the lowest planning score among ${eligible} eligible offers. A draft awaits manager approval.`):'No eligible draft. Request evidence or revise the order.']
- ];
- const mode=r.mode==='gemini_tool_calls'?'Live Gemini tool calls':r.mode==='model_tool_calls'?'Live model tool calls':'Rules preview (no model call)';
- return `<p><b>${escape(mode)}</b> · Python independently verified the checks and calculations.</p><ol class="checklist">${steps.map((x,i)=>`<li><b>${escape(x[0])}</b><br>${escape(x[1])}</li>`).join('')}</ol><details><summary>View audit details (optional)</summary>${r.agent_trace.map((t,i)=>`<details><summary>${i+1}. ${escape(t.tool)}</summary><pre>${escape(JSON.stringify(t.result??t.why,null,2))}</pre></details>`).join('')}<pre>${escape(JSON.stringify({decision_id:r.decision_id,rules:r.rules,assumptions:r.assumptions},null,2))}</pre></details>`;
+/* ----- Top Enterprise Header ----- */
+.top-header{
+  background:linear-gradient(180deg,var(--cgi-navy) 0%,var(--cgi-navy-surface) 100%);
+  color:#fff;
+  border-bottom:1px solid var(--cgi-navy-border);
+  position:sticky;
+  top:0;
+  z-index:40;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
+.header-topbar{
+  max-width:1520px;
+  margin:0 auto;
+  padding:12px 24px;
+  display:flex;
+  gap:16px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+.brand-group{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.brand-logo{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#10b981 0%,#047857 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 16px rgba(16,185,129,0.35);
+  border:1px solid rgba(255,255,255,0.2);
+}
+.brand-logo svg{width:22px;height:22px;stroke:#fff}
+.brand-text h1{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:-0.02em;
+  line-height:1.2;
+}
+.brand-text h1 span{color:#34d399}
+.brand-sub{
+  font-size:10.5px;
+  font-weight:600;
+  color:#94a3b8;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.domain-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.14);
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:11.5px;
+  color:#e2e8f0;
+  font-weight:600;
+}
+.domain-badge .dot{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981}
+.header-controls{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.control-item{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.control-item label{
+  font-size:11px;
+  font-weight:600;
+  color:#94a3b8;
+  letter-spacing:0.02em;
+}
+.top-select{
+  background:var(--cgi-navy-card);
+  color:#f8fafc;
+  border:1px solid var(--cgi-navy-border);
+  border-radius:7px;
+  padding:6px 12px;
+  font-size:12.5px;
+  font-weight:500;
+  min-width:210px;
+  height:35px;
+  transition:border-color 0.15s,box-shadow 0.15s;
+}
+.top-select:focus{
+  outline:none;
+  border-color:var(--em-l);
+  box-shadow:0 0 0 3px rgba(16,185,129,0.25);
 }
 
-function openReport(){window.open('/report?id='+encodeURIComponent(report.decision_id),'_blank','noopener')}
-async function decision(action){let res=await fetch('/api/decision',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision_id:report.decision_id,role:'procurement_manager',action,note:$('note').value})});let d=await res.json();$('approvalState').textContent=res.ok?`${action.toUpperCase()} recorded at ${d.at}; no external PO sent.`:`Error: ${d.error}`;if(res.ok){$('poState').textContent=action==='approve'?'Manager approved draft · not transmitted':'Manager rejected draft · revision requested';$('approve').disabled=true;$('reject').disabled=true}}
-fetch('/api/fixtures').then(r=>r.json()).then(d=>{fixtures=d;$('scenario').innerHTML=d.map((o,i)=>`<option value="${i}">${escape(o.id)} · ${escape(o.name)}</option>`).join('');renderOrder(d[0])}).catch(e=>$('status').textContent='Could not load scenarios: '+e.message);
-</script></body></html>
+/* ----- Hero Axiom & 4-Stage Stepper Banner ----- */
+.hero-banner{
+  background:linear-gradient(180deg,var(--cgi-navy-surface) 0%,#0c172d 100%);
+  border-bottom:1px solid var(--cgi-navy-border);
+  color:#fff;
+  padding:16px 24px;
+}
+.hero-inner{
+  max-width:1520px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.axiom-strip{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:14px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+  padding:10px 18px;
+}
+.axiom-text{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13.5px;
+  font-weight:500;
+  color:#cbd5e1;
+}
+.axiom-highlight{
+  font-weight:800;
+  font-size:15px;
+  color:#f8fafc;
+  background:linear-gradient(90deg,#6ee7b7,#38bdf8,#c084fc);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.axiom-pills{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.stage-stepper{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.stage-card{
+  background:rgba(21,36,66,0.6);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:relative;
+  transition:all 0.2s;
+}
+.stage-card.active{
+  border-color:rgba(16,185,129,0.5);
+  background:rgba(16,185,129,0.08);
+}
+.stage-num{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  color:#94a3b8;
+  font-size:12px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+}
+.stage-card.active .stage-num{
+  background:var(--em);
+  color:#fff;
+  box-shadow:0 0 10px rgba(16,185,129,0.5);
+}
+.stage-info h4{
+  margin:0;
+  font-size:12px;
+  font-weight:700;
+  color:#f1f5f9;
+  letter-spacing:0.01em;
+}
+.stage-info p{
+  margin:1px 0 0;
+  font-size:11px;
+  color:#94a3b8;
+  line-height:1.3;
+}
+
+/* ----- Interactive Evaluator Demo Showcase Bar ----- */
+.demo-showcase-bar{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  box-shadow:0 2px 8px rgba(15,23,42,0.04);
+  padding:10px 24px;
+}
+.showcase-inner{
+  max-width:1520px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.showcase-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--cgi-navy);
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+}
+.showcase-title svg{width:16px;height:16px;stroke:var(--amber)}
+.showcase-buttons{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.demo-btn{
+  background:var(--canvas);
+  border:1px solid var(--line-strong);
+  border-radius:6px;
+  padding:6px 12px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink-secondary);
+  cursor:pointer;
+  transition:all 0.15s;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  line-height:1.2;
+}
+.demo-btn:hover{
+  background:#fff;
+  border-color:var(--em);
+  color:var(--em-d);
+  box-shadow:var(--shadow-sm);
+}
+.demo-btn.highlight{
+  background:var(--em-surface);
+  border-color:var(--em-border);
+  color:var(--em-d);
+}
+.demo-btn.highlight:hover{
+  background:#d1fae5;
+  border-color:var(--em);
+}
+.rubric-btn{
+  background:var(--blue-surface);
+  border-color:var(--blue-border);
+  color:var(--blue);
+}
+.rubric-btn:hover{
+  background:#dbeafe;
+  border-color:var(--blue);
+}
+
+/* ----- Main Shell & Layout ----- */
+.shell{
+  max-width:1520px;
+  margin:0 auto;
+  padding:16px 24px 32px;
+}
+.section{
+  background:var(--card-bg);
+  border:1px solid var(--line);
+  border-radius:12px;
+  box-shadow:var(--shadow-sm);
+  margin-bottom:20px;
+  padding:20px 24px;
+  position:relative;
+}
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.section-title h2{
+  font-size:16px;
+  font-weight:750;
+  letter-spacing:-0.015em;
+  color:var(--cgi-navy);
+  margin:0 0 3px;
+}
+.kicker{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:11.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--em-d);
+  margin-bottom:3px;
+}
+.kicker::before{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:2px;
+  background:var(--em);
+}
+.hint{
+  font-size:12.5px;
+  color:var(--muted);
+  margin:0;
+}
+
+/* ----- Badges ----- */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  border-radius:6px;
+  padding:3px 9px;
+  font-size:11.5px;
+  font-weight:650;
+  line-height:1.4;
+  white-space:nowrap;
+  border:1px solid transparent;
+}
+.badge.good{background:var(--em-surface);color:var(--em-d);border-color:var(--em-border)}
+.badge.warn{background:var(--amber-surface);color:var(--amber);border-color:var(--amber-border)}
+.badge.bad{background:var(--cgi-red-light);color:var(--cgi-red);border-color:#fecaca}
+.badge.neutral{background:#f1f5f9;color:var(--ink-secondary);border-color:var(--line-strong)}
+.badge.model{background:var(--blue-surface);color:var(--blue);border-color:var(--blue-border)}
+.badge.guard{background:var(--violet-surface);color:var(--violet);border-color:var(--violet-border)}
+.badge.sdg{background:rgba(16,185,129,0.18);color:#6ee7b7;border-color:rgba(110,231,183,0.35)}
+.badge.domain{background:rgba(255,255,255,0.08);color:#cbd5e1;border-color:rgba(255,255,255,0.14)}
+
+/* ----- Form Controls & Grid ----- */
+.controls{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr)) 240px;
+  gap:14px;
+  align-items:end;
+}
+.control label{
+  font-size:12px;
+  font-weight:650;
+  color:var(--ink-secondary);
+  display:block;
+  margin-bottom:5px;
+}
+.control small{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+  line-height:1.3;
+}
+.control.wide{grid-column:span 2}
+input,select,textarea{
+  border:1px solid var(--line-strong);
+  background:#fff;
+  color:var(--ink);
+  border-radius:7px;
+  padding:7px 10px;
+  width:100%;
+  min-height:36px;
+  font-size:13px;
+  transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;
+}
+input:hover,select:hover,textarea:hover{border-color:#94a3b8}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:var(--em);
+  box-shadow:0 0 0 3px rgba(5,150,105,0.2);
+}
+.slider-row{
+  display:grid;
+  grid-template-columns:1fr 110px;
+  gap:10px;
+  align-items:center;
+}
+input[type=range]{
+  padding:0;
+  min-height:0;
+  height:32px;
+  border:0;
+  background:transparent;
+  accent-color:var(--em);
+}
+input[type=checkbox]{
+  accent-color:var(--em);
+  min-height:0;
+  width:16px;
+  height:16px;
+  cursor:pointer;
+}
+
+/* ----- Buttons ----- */
+button{
+  cursor:pointer;
+  border:1px solid transparent;
+  border-radius:7px;
+  padding:8px 14px;
+  min-height:36px;
+  font-weight:650;
+  font-size:13px;
+  line-height:1.2;
+  transition:all 0.15s ease-in-out;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+button:disabled{opacity:0.45;cursor:not-allowed}
+button.primary{
+  background:linear-gradient(180deg,#10b981 0%,#059669 100%);
+  color:#fff;
+  border-color:#047857;
+  box-shadow:0 1px 3px rgba(4,120,87,0.3);
+}
+button.primary:hover:not(:disabled){
+  background:linear-gradient(180deg,#059669 0%,#047857 100%);
+  box-shadow:0 3px 8px rgba(4,120,87,0.4);
+}
+button.secondary{
+  background:#fff;
+  color:var(--ink-secondary);
+  border-color:var(--line-strong);
+}
+button.secondary:hover:not(:disabled){
+  background:#f8fafc;
+  border-color:#94a3b8;
+  color:var(--ink);
+}
+button.danger{
+  background:#fff;
+  color:var(--cgi-red);
+  border-color:#fca5a5;
+}
+button.danger:hover:not(:disabled){
+  background:var(--cgi-red-light);
+  border-color:var(--cgi-red);
+}
+button.small{
+  padding:4px 10px;
+  min-height:28px;
+  font-size:12px;
+}
+
+/* Run Evaluation Button */
+.run{
+  height:38px;
+  width:100%;
+  font-size:13.5px;
+  font-weight:750;
+  letter-spacing:0.01em;
+  background:linear-gradient(135deg,#059669 0%,#047857 100%);
+  color:#fff;
+  border:1px solid #065f46;
+  box-shadow:0 3px 10px rgba(5,150,105,0.35);
+}
+.run:hover:not(:disabled){
+  box-shadow:0 5px 14px rgba(5,150,105,0.45);
+  transform:translateY(-1px);
+}
+#evaluate:disabled{
+  opacity:1;
+  cursor:progress;
+  background:linear-gradient(110deg,#059669 30%,#34d399 50%,#059669 70%) 0 0/220% 100%;
+  animation:shimmer 1.2s linear infinite;
+}
+@keyframes shimmer{to{background-position:-220% 0}}
+
+.statusline{
+  font-size:12px;
+  font-weight:550;
+  color:var(--ink-secondary);
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-left:3.5px solid var(--em);
+  border-radius:7px;
+  padding:8px 12px;
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* ----- Supplier Table ----- */
+.tablewrap{
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  box-shadow:var(--shadow-sm);
+}
+table{
+  border-collapse:collapse;
+  width:100%;
+  font-size:12.5px;
+}
+th{
+  background:#f8fafc;
+  color:var(--muted);
+  text-align:left;
+  font-size:11.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  white-space:nowrap;
+  border-bottom:1px solid var(--line-strong);
+  padding:10px 12px;
+}
+th,td{
+  padding:10px 12px;
+  border-bottom:1px solid var(--line);
+  vertical-align:middle;
+}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fbfcfe}
+#offersTable td input,#offersTable td select{
+  padding:5px 8px;
+  font-size:12.5px;
+  min-height:30px;
+  border-color:transparent;
+  background:transparent;
+}
+#offersTable td input:hover,#offersTable td select:hover{
+  border-color:var(--line-strong);
+  background:#fff;
+}
+#offersTable td input:focus,#offersTable td select:focus{
+  background:#fff;
+  border-color:var(--em);
+}
+#offersTable{min-width:1320px}
+td select{min-width:125px}
+td input[data-key="lead_days"]{width:65px;min-width:65px;display:inline-block}
+#offersTable td:first-child input{min-width:140px;font-weight:600}
+#offersTable td:nth-child(7) input,#offersTable td:nth-child(8) input{min-width:130px}
+#offersTable td:nth-child(9){min-width:260px}
+tbody tr.winner-row{
+  background:var(--em-surface)!important;
+}
+tbody tr.winner-row td:first-child{
+  box-shadow:inset 4px 0 0 var(--em);
+}
+.reason{
+  margin-top:4px;
+  font-size:11.5px;
+  color:var(--amber);
+  max-width:280px;
+  line-height:1.35;
+}
+.unit-price{
+  display:block;
+  padding:2px 0 0 2px;
+  color:var(--muted);
+  font-size:11.5px;
+  font-weight:550;
+}
+
+/* ----- AI Evidence Intake Drawer ----- */
+.evidence-grid{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:16px;
+  margin-bottom:12px;
+}
+.drop{
+  border:2px dashed #cbd5e1;
+  background:#f8fafc;
+  border-radius:10px;
+  padding:18px 20px;
+  display:block;
+  cursor:pointer;
+  color:var(--ink-secondary);
+  transition:all 0.15s;
+}
+.drop:hover,.drop:focus-within{
+  border-color:var(--em);
+  background:var(--em-surface);
+}
+.drop b{color:var(--cgi-navy);font-size:13.5px}
+.drop input{display:none}
+.preview{
+  border:1px solid var(--amber-border);
+  border-left:4px solid var(--amber);
+  background:var(--amber-surface);
+  border-radius:10px;
+  padding:16px;
+  margin-top:14px;
+}
+.preview-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.preview-grid label{
+  display:block;
+  font-size:11.5px;
+  font-weight:650;
+  text-transform:capitalize;
+  color:var(--ink-secondary);
+  margin-bottom:4px;
+}
+
+/* ----- Workspace Grid (Trace & Recommendation) ----- */
+.workspace{
+  display:grid;
+  grid-template-columns:minmax(0,5fr) minmax(0,7fr);
+  gap:20px;
+  align-items:start;
+  margin-bottom:20px;
+}
+.workspace .section{margin:0;min-width:0}
+
+/* ----- Agent Execution Trace ----- */
+.trace-legend{
+  font-size:12px;
+  color:var(--ink-secondary);
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:10px 14px;
+  margin-bottom:16px;
+  line-height:1.8;
+}
+.trace-step{
+  position:relative;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:9px;
+  padding:12px 14px;
+  margin:0 0 12px 28px;
+  box-shadow:var(--shadow-sm);
+  transition:all 0.15s;
+}
+.trace-step:hover{border-color:var(--line-strong);box-shadow:var(--shadow-md)}
+.trace-step::before{
+  content:"";
+  position:absolute;
+  left:-28px;
+  top:16px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#fff;
+  border:3.5px solid var(--em);
+  z-index:1;
+}
+.trace-step::after{
+  content:"";
+  position:absolute;
+  left:-22px;
+  top:32px;
+  bottom:-14px;
+  width:2px;
+  background:var(--line-strong);
+}
+.trace-step:last-of-type::after{display:none}
+.trace-step h3{
+  font-size:13.5px;
+  font-weight:750;
+  margin:0 0 6px;
+  color:var(--cgi-navy);
+}
+.trace-step p{
+  font-size:12.5px;
+  margin:8px 0 0;
+  color:var(--ink-secondary);
+  line-height:1.45;
+}
+details{margin-top:14px}
+summary{
+  cursor:pointer;
+  font-weight:650;
+  font-size:12.5px;
+  color:var(--ink-secondary);
+  padding:6px 0;
+}
+summary:hover{color:var(--em-d)}
+pre{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  word-break:break-word;
+  background:var(--cgi-navy);
+  color:#d1fae5;
+  border-radius:8px;
+  padding:12px 14px;
+  max-height:260px;
+  overflow:auto;
+  margin:8px 0;
+}
+
+/* ----- Recommendation & Draft PO ----- */
+.diff{
+  background:linear-gradient(135deg,var(--em-surface) 0%,#d1fae5 100%);
+  border:1px solid var(--em-border);
+  border-left:4.5px solid var(--em);
+  padding:12px 16px;
+  margin-bottom:14px;
+  border-radius:8px;
+  font-size:13px;
+  color:#064e3b;
+  box-shadow:var(--shadow-sm);
+  animation:pulseBanner 1.5s ease-out 1;
+}
+@keyframes pulseBanner{
+  0%{transform:scale(0.98);opacity:0.8}
+  50%{transform:scale(1.01)}
+  100%{transform:scale(1)}
+}
+.recommend{
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:-0.02em;
+  color:var(--cgi-navy);
+  margin:4px 0 8px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.facts{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:14px 0;
+}
+.fact{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:12px 14px;
+  box-shadow:var(--shadow-sm);
+}
+.fact:first-child{
+  background:var(--em-surface);
+  border-color:var(--em-border);
+}
+.fact strong{
+  font-size:19px;
+  font-weight:800;
+  display:block;
+  color:var(--cgi-navy);
+  letter-spacing:-0.01em;
+}
+.fact small{
+  color:var(--muted);
+  font-size:11.5px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.notice{
+  border:1px solid var(--amber-border);
+  border-left:4px solid var(--amber);
+  background:var(--amber-surface);
+  color:#78350f;
+  padding:10px 14px;
+  margin:12px 0;
+  font-size:12.5px;
+  border-radius:8px;
+}
+
+/* ----- Cost vs Carbon Pareto Chart ----- */
+.plot{
+  height:240px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  margin:14px 0;
+  box-shadow:var(--shadow-sm);
+  position:relative;
+  overflow:hidden;
+}
+.plot svg{width:100%;height:100%}
+
+/* ----- Enterprise PO Document Card ----- */
+.po{
+  position:relative;
+  border:1px solid var(--line-strong);
+  border-top:4px solid var(--em);
+  background:#fff;
+  border-radius:10px;
+  padding:18px 20px;
+  margin:14px 0;
+  box-shadow:var(--shadow-md);
+}
+.po::after{
+  content:"DRAFT PO";
+  position:absolute;
+  right:16px;
+  top:14px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.12em;
+  color:var(--amber);
+  border:1.5px solid var(--amber);
+  border-radius:5px;
+  padding:2px 8px;
+  transform:rotate(2deg);
+  background:var(--amber-surface);
+}
+.po h3{
+  font-size:15px;
+  font-weight:750;
+  margin:4px 0 0;
+  color:var(--cgi-navy);
+}
+.po dl{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px 18px;
+  margin:14px 0 4px;
+  padding-top:14px;
+  border-top:1px dashed var(--line-strong);
+}
+.po dt{font-size:11.5px;color:var(--muted);text-transform:uppercase;font-weight:600}
+.po dd{font-weight:700;font-size:13.5px;margin:0 0 8px;color:var(--cgi-navy)}
+
+/* Governance Actions */
+.approval-actions{
+  margin-top:12px;
+  padding:14px 16px;
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:9px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.audit{
+  border-top:1px solid var(--line);
+  padding-top:12px;
+  margin-top:14px;
+}
+.audit p{font-size:12px;margin:4px 0;color:var(--ink-secondary)}
+
+/* ----- Metrics Strip ----- */
+.metric-strip{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin:18px 0;
+}
+.metric{
+  background:#fff;
+  border:1px solid var(--line);
+  border-top:3.5px solid var(--em-l);
+  border-radius:10px;
+  padding:14px 16px;
+  box-shadow:var(--shadow-sm);
+}
+.metric strong{
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:-0.02em;
+  display:block;
+  color:var(--cgi-navy);
+}
+.metric span{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:550;
+}
+.metric input{
+  max-width:84px;
+  padding:3px 6px;
+  font-size:16px;
+  min-height:28px;
+  display:inline-block;
+  width:84px;
+  font-weight:700;
+}
+
+/* ----- Interactive ROI & CGI Accelerator Panel ----- */
+.accelerator-panel{
+  background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px 24px;
+  margin-top:20px;
+  box-shadow:var(--shadow-sm);
+}
+.roi-grid{
+  display:grid;
+  grid-template-columns:1.2fr 1.8fr;
+  gap:20px;
+  align-items:center;
+}
+.roi-card{
+  background:#fff;
+  border:1px solid var(--line-strong);
+  border-radius:10px;
+  padding:16px;
+  box-shadow:var(--shadow-sm);
+}
+.roi-metric-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:12px;
+}
+.roi-box{
+  background:var(--em-surface);
+  border:1px solid var(--em-border);
+  border-radius:8px;
+  padding:10px 12px;
+  text-align:center;
+}
+.roi-box strong{
+  font-size:18px;
+  font-weight:800;
+  color:var(--em-d);
+  display:block;
+}
+.roi-box small{
+  font-size:11px;
+  color:#065f46;
+  font-weight:600;
+}
+
+/* ----- Rubric Modal ----- */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(9,18,36,0.7);
+  backdrop-filter:blur(4px);
+  z-index:90;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  animation:fadeIn 0.2s ease-out;
+}
+.modal-window{
+  background:#fff;
+  border-radius:14px;
+  max-width:860px;
+  width:100%;
+  max-height:85vh;
+  overflow-y:auto;
+  box-shadow:var(--shadow-lg);
+  padding:24px 28px;
+  position:relative;
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--line);
+  padding-bottom:14px;
+  margin-bottom:16px;
+}
+.modal-header h3{margin:0;font-size:18px;font-weight:800;color:var(--cgi-navy)}
+.modal-close{
+  background:none;
+  border:none;
+  font-size:22px;
+  cursor:pointer;
+  color:var(--muted);
+  padding:4px 8px;
+  min-height:0;
+}
+.rubric-grid{
+  display:grid;
+  gap:12px;
+}
+.rubric-item{
+  border:1px solid var(--line);
+  border-left:4px solid var(--em);
+  border-radius:8px;
+  padding:12px 16px;
+  background:#f8fafc;
+}
+.rubric-item h4{
+  margin:0 0 4px;
+  font-size:13.5px;
+  font-weight:750;
+  color:var(--cgi-navy);
+  display:flex;
+  justify-content:space-between;
+}
+.rubric-item p{margin:0;font-size:12px;color:var(--ink-secondary);line-height:1.45}
+
+/* ----- Utilities & Animations ----- */
+.hidden{display:none!important}
+.tiny{font-size:11.5px;color:var(--muted)}
+.foot{
+  color:var(--muted);
+  font-size:11.5px;
+  text-align:center;
+  padding:20px;
+  border-top:1px solid var(--line);
+  margin-top:20px;
+}
+#results:not(.hidden){animation:rise 0.35s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* Responsive */
+@media(max-width:1150px){
+  .controls{grid-template-columns:repeat(4,1fr)}
+  .workspace{grid-template-columns:1fr}
+  .evidence-grid{grid-template-columns:1fr}
+  .stage-stepper{grid-template-columns:repeat(2,1fr)}
+  .roi-grid{grid-template-columns:1fr}
+  .metric-strip{grid-template-columns:repeat(2,1fr)}
+  .top-header{position:static}
+}
+@media(max-width:640px){
+  .shell{padding:12px}
+  .controls{grid-template-columns:repeat(2,1fr)}
+  .control.wide{grid-column:span 2}
+  .preview-grid{grid-template-columns:repeat(2,1fr)}
+  .facts,.metric-strip,.roi-metric-row{grid-template-columns:1fr}
+  .stage-stepper{grid-template-columns:1fr}
+  .top-select{min-width:0;width:100%}
+}
+
+/* EcoPulse manager experience: warm editorial canvas, precise operational controls. */
+:root{--cgi-navy:#292824;--cgi-navy-surface:#37332e;--cgi-navy-card:#463d35;--cgi-navy-border:#67584e;--em:#58774e;--em-d:#425f3a;--em-l:#89a97e;--em-surface:#eef4e9;--em-border:#c9dec1;--amber:#9c6d32;--amber-surface:#fbf2e3;--amber-border:#ead5ae;--blue:#526f78;--blue-surface:#eaf1f2;--blue-border:#c6d9dc;--violet:#806454;--violet-surface:#f3ece6;--violet-border:#ddcec0;--canvas:#f3f1ec;--card-bg:#fffdf9;--ink:#282824;--ink-secondary:#504b45;--muted:#746f68;--line:#e5e0d7;--line-strong:#d7cfc2;--shadow-sm:0 1px 3px #3d322518;--shadow-md:0 7px 24px #3d32251a;--shadow-lg:0 15px 38px #3d322525;--font-sans:'DM Sans','Segoe UI',Roboto,Arial,sans-serif;--font-display:'Manrope','Segoe UI',sans-serif}
+body{background:radial-gradient(circle at 9% 8%,#ead6ce 0,transparent 28%),radial-gradient(circle at 93% 18%,#f1e3bd 0,transparent 29%),#f3f1ec;color:var(--ink)}html{scroll-behavior:smooth}button,input,select,textarea{font-family:var(--font-sans)}
+.top-header{background:#2b2926;border-bottom:1px solid #5e574e;box-shadow:0 5px 17px #2b292629}.header-topbar{max-width:1510px;min-height:70px;padding:10px 25px}.brand-logo{background:#819e74;box-shadow:none;border:1px solid #a9bf9f;border-radius:8px}.brand-text h1{font-family:var(--font-display);font-size:19px;letter-spacing:-.045em}.brand-text h1 span{color:#d3dec9}.brand-sub{letter-spacing:.04em;color:#c3bcb3;text-transform:none;font-size:10px}.domain-badge{border-radius:99px;color:#dfdcd3;background:#ffffff13;border-color:#ffffff26;letter-spacing:.04em}.domain-badge .dot{background:#9bb988;box-shadow:0 0 8px #a7c99b}.control-item label{color:#bdb8ac}.top-select{background:#403a33;border:1px solid #726a5e;border-radius:7px;color:#f8f5ee;min-width:200px}.top-select:focus{border-color:#bdd0ad;box-shadow:0 0 0 3px #accd9b55}
+.hero-banner{position:relative;overflow:hidden;padding:0;background:linear-gradient(110deg,#dbb9ab 0%,#eddfcf 46%,#f1e8ce 78%,#d6dfc6 100%);border-bottom:1px solid #d4c5b5;color:#2f2b26}.hero-banner:before{content:"";position:absolute;inset:-120px auto auto 35%;width:590px;height:590px;border:1px solid #7d6a5a1c;border-radius:50%;pointer-events:none}.hero-inner{max-width:1510px;min-height:350px;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(390px,.88fr);align-items:center;gap:25px;padding:35px 25px 27px}.hero-copy{position:relative;z-index:2}.hero-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.13em;font-weight:700;color:#62564b;display:flex;align-items:center;gap:10px}.hero-live-dot{width:8px;height:8px;background:#648b5b;border-radius:50%;box-shadow:0 0 0 5px #648b5b24}.hero-copy h2{font-family:var(--font-display);font-weight:800;letter-spacing:-.075em;font-size:clamp(48px,5vw,78px);line-height:.98;margin:20px 0 16px;color:#292824}.hero-copy h2 em{font-style:italic;color:#5f594b}.hero-copy p{font-size:16px;line-height:1.6;max-width:600px;color:#5b554e;margin:0 0 18px}.hero-link{display:inline-flex;align-items:center;gap:20px;background:#35322e;color:#fffaf1;text-decoration:none;border-radius:99px;padding:11px 19px;font-weight:750;font-size:13px;box-shadow:0 7px 15px #3a302838;transition:transform .2s,background .2s}.hero-link:hover{transform:translateY(-2px);background:#506744}.hero-link span{font-size:19px;line-height:1}.hero-trust{font-size:11px;color:#6b635a;margin-top:13px}.hero-visual{height:280px;position:relative}.orbit{position:absolute;left:13%;top:2%;width:72%;height:91%;border:1px solid #715c4a44;border-radius:50%;transform:rotate(-15deg)}.orbit-two{transform:rotate(27deg);border-style:dashed;border-color:#506b4f55}.hero-core{position:absolute;left:42%;top:32%;width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:#2e3329;color:#d5edc9;border:7px solid #ffffff99;box-shadow:0 15px 30px #3e473c44}.hero-core svg{width:70px;height:70px}.signal-card{position:absolute;z-index:3;width:190px;background:#faf6ede6;backdrop-filter:blur(12px);border:1px solid #ffffffca;border-radius:11px;box-shadow:0 12px 30px #62524326;padding:12px 14px;animation:floatSoft 5s ease-in-out infinite}.signal-card small{display:block;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;color:#876d59}.signal-card strong{display:block;font-size:13px;color:#2b3028;margin:4px 0 3px}.signal-card span{font-size:10px;color:#746d60}.signal-one{left:2%;top:8%}.signal-two{right:0;top:5%;animation-delay:-1.7s}.signal-three{right:3%;bottom:7%;animation-delay:-3.1s}@keyframes floatSoft{50%{transform:translateY(-7px)}}.hero-ticker{background:#34342d;color:#e6e0cf;overflow:hidden;white-space:nowrap;padding:8px 0}.ticker-track{display:flex;gap:50px;width:max-content;animation:tickerMove 32s linear infinite}.ticker-track span{font-family:var(--font-mono);font-size:10px;letter-spacing:.11em}.ticker-track span:before{content:"●";font-size:8px;color:#a7c58a;margin-right:17px}@keyframes tickerMove{to{transform:translateX(-50%)}}
+.demo-showcase-bar{background:#f9f6f0;border-bottom:1px solid #e2d9cb}.showcase-inner{max-width:1510px;padding:13px 25px}.showcase-title{color:#675848;font-size:12px}.showcase-title svg{stroke:#647c56}.demo-btn{background:#fffdf9;color:#51493f;border-color:#d9d0c4;box-shadow:0 2px 5px #3b322010;border-radius:8px}.demo-btn:hover{background:#eff3e8;border-color:#92a585;color:#365131}.demo-btn.highlight{background:#5b784f;border-color:#5b784f;color:white}.demo-btn.highlight:hover{background:#455e3b;color:white}
+.shell{max-width:1510px;padding:18px 25px}section.section{background:#fffdf9;border-color:#e0d9cf;border-radius:12px;box-shadow:0 6px 24px #51433910;margin-bottom:17px}.section-head{gap:14px}.kicker{text-transform:uppercase;color:#778664;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em}.section h2{font-family:var(--font-display);color:#332f2a;font-size:22px;letter-spacing:-.04em}.hint{color:#746b61}.badge.neutral,.badge.domain{background:#eeeae3;color:#605b54;border:1px solid #e3ddd2}.badge.good{background:#e8f2e4;color:#3f6a3b}.badge.warn{background:#fbf1dc;color:#855f2a}.badge.bad{background:#f7e7e3;color:#a14435}.badge.model{background:#e6f0f0;color:#466d76}.badge.guard{background:#efe9e0;color:#785d49}.section .controls{gap:12px}.control label{color:#776b60;font-size:11px}.control input,.control select,.preview-grid input{border-color:#d8d0c4;background:#fffdfb;border-radius:7px}.control input:focus,.control select:focus,textarea:focus,.preview-grid input:focus{border-color:#6e8b60;outline:2px solid #8ca98088;outline-offset:0}.control input[type=range]{accent-color:#658653;background:transparent}.primary{background:#56764b;border-color:#56764b;box-shadow:0 4px 9px #56764b25}.primary:hover{background:#405e38;border-color:#405e38}.secondary{background:#ede9e2;color:#443e36;border-color:#d9d1c5}.secondary:hover{background:#e2dfd4}.run{background:#3d5f3b}.statusline{background:#eff3e9;color:#435b3d;border:1px solid #d7e1cf;border-radius:7px;padding:7px}.tablewrap{border:1px solid #e0d8cc;border-radius:9px;overflow-x:auto}table th{background:#eeeae2;color:#71695f;font-family:var(--font-mono);font-weight:700}table td{border-color:#eee8df}tbody tr:nth-child(even){background:#fcfaf6}#offersTable tr.winner-row,.winner-row{background:#eaf4e7!important;box-shadow:inset 4px 0 #67875a}#offersTable input,#offersTable select{background:transparent}#offersTable input:hover,#offersTable select:hover{background:white;border-color:#a5bb94}.reason{color:#986944}.drop{border-color:#aaad98;background:#f5f3eb}.drop:hover{background:#edf1e6}.preview{background:#faf6ed;border-color:#ddc7a9}.workspace{grid-template-columns:minmax(0,.93fr) minmax(0,1.07fr);gap:16px}.workspace .section{background:#fffdf9}.trace-legend{background:#f4f0e9;border:1px solid #e5ded3;border-radius:9px;padding:10px;color:#625a51}.trace-step{background:#fffdf9;border-color:#e9e2d6}.trace-step:before{border-color:#78936d}.trace-step h3{color:#35302b}.trace-step p{color:#625c54}.plot{background:#fffdf9;border-color:#ddd5c9;box-shadow:none}.plot svg{animation:graphReveal .5s ease-out both}@keyframes graphReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.diff{background:#edf5e9;border-color:#c9dfc2;border-left-color:#648657;color:#385b36}.recommend{color:#3d5c39;font-family:var(--font-display)}.facts .fact{border-color:#e5ded4;background:#f9f7f1}.facts .fact:first-child{background:#eaf4e7;border-color:#ccdcbc}.fact strong{color:#302e2a}.po{border-color:#d9d0c2;border-top-color:#69875c;box-shadow:0 8px 23px #66523c17;background:#fffcf5}.po h3,.po dd{color:#33302a}.approval-actions{background:#f5f3ed;border-color:#e4dcd0}.notice{background:#faf1df;border-color:#e9d3ae;border-left-color:#a07238;color:#725324}.metric{border-color:#e0d8cc;background:#fffdf9;border-top-color:#8ba47b}.metric strong{color:#4a5e3f}.metric-strip{margin:14px 0 20px}.foot{background:#eee9de;color:#6b645b;border-top:1px solid #ded5c8;font-size:11px;padding:18px}.hidden{display:none!important}
+@media(max-width:1050px){.hero-inner{grid-template-columns:1fr;gap:0}.hero-visual{height:240px}.header-topbar{flex-wrap:wrap}.workspace{grid-template-columns:1fr}}@media(max-width:650px){.hero-copy h2{font-size:48px}.hero-visual{height:220px}.signal-card{width:150px}.signal-two{right:0}.signal-three{bottom:0}.hero-core{left:37%}.hero-inner{padding:26px 17px}.shell{padding:14px}.showcase-inner{padding:12px}.hero-ticker{display:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.signal-card,.ticker-track,.plot svg,.diff{animation:none!important}button{transition:none!important}}
+.history-panel{margin-top:18px}.history-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.history-item{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;font:inherit;text-decoration:none;color:#50493f;background:#f7f5ed;border:1px solid #e4dacd;border-radius:8px;padding:10px 13px;transition:background .2s,transform .2s}.history-item:hover,.history-item:focus-visible{background:#edf2e8;transform:translateY(-2px)}.history-item b{display:block;color:#3f5a38;font-size:13px}.history-item small{font-family:var(--font-mono);display:block;font-size:11px;color:#867b70}.history-item>span:last-child{white-space:nowrap;font-size:11px;color:#766a5d}.history-review{margin-top:14px;padding:18px;border:1px solid #bad5bb;border-radius:10px;background:#f1f7ee}.history-review h3{margin:0 0 8px;color:#183d2a;font-size:20px}.history-review p{margin:7px 0;line-height:1.5}.history-review .actions{margin-top:12px}#results{scroll-margin-top:90px}
+@media(max-width:650px){.history-list{grid-template-columns:1fr}}
+
+/* Landing palette: sage green, warm grey and muted brown. Dashboard below is unchanged. */
+.hero-banner{background:linear-gradient(112deg,#b9cab8 0%,#d9ded8 34%,#e4dfd3 65%,#bca184 100%);border-bottom-color:#b6b4a5}
+.hero-banner:before{border-color:#5b745933}
+.hero-eyebrow{color:#46594b}.hero-live-dot{background:#557b56;box-shadow:0 0 0 5px #557b5625}
+.hero-copy h2{color:#252a28}.hero-copy h2 em{color:#735b45}.hero-copy p{color:#3f4944}.hero-trust{color:#5b6158}
+.hero-link{background:#344d3d;color:#f7f5ed;box-shadow:0 7px 16px #35463a36}.hero-link:hover{background:#263b30}
+.orbit{border-color:#566c5940}.orbit-two{border-color:#795e444b}
+.hero-core{background:#304739;color:#d8e8d0;border-color:#e7e4dba8;box-shadow:0 15px 30px #3447373d}
+.signal-card{background:#f2f1eacb;border-color:#faf9f0d9;box-shadow:0 12px 26px #3c483323}
+.signal-card small{color:#795f4a}.signal-card strong{color:#2e3b32}.signal-card span{color:#62685f}
+.hero-ticker{background:#344139;color:#e8ece4}.ticker-track span:before{color:#bd9f77}
+
+/* Stronger green landing palette: forest green leads, grey and brown support. */
+.top-header{background:#193a2b;border-bottom-color:#77916f}
+.hero-banner{background:linear-gradient(112deg,#1e5038 0%,#337451 39%,#9dbda2 69%,#c5af91 100%);border-bottom-color:#557b5d}
+.hero-banner:before{border-color:#d4e8d555}
+.hero-eyebrow{color:#d5ead5}.hero-live-dot{background:#d1ecac;box-shadow:0 0 0 5px #c0dfa735}
+.hero-copy h2{color:#f7f8f1}.hero-copy h2 em{color:#d0edbb}.hero-copy p{color:#eef5ec}.hero-trust{color:#d8e8d7}
+.hero-link{background:#efe8d8;color:#254332;box-shadow:0 8px 18px #142d2440}.hero-link:hover{background:#ffffff;color:#21422e}
+.orbit{border-color:#f0f4e581}.orbit-two{border-color:#4e66516e}
+.signal-card{background:#f5f2e8e8;border-color:#ffffffda;box-shadow:0 14px 28px #163e2b3b}
+.signal-card small{color:#776044}.signal-card strong{color:#264333}.signal-card span{color:#5b675c}
+.hero-core{background:#1b3a2c;color:#c9edb9;border-color:#f2f4e8b5;box-shadow:0 15px 33px #15352270}
+.hero-ticker{background:#17392a;color:#e3eddf}.ticker-track span:before{color:#c5a77c}
+</style>
+</head>
+<body>
+
+<!-- TOP ENTERPRISE HEADER -->
+<header class="top-header">
+  <div class="header-topbar">
+    <div class="brand-group">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 13h4l2.5-6 4 11 2.5-5h5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>eco<b>pulse</b> <span>Enterprise</span></h1>
+        <div class="brand-sub">Procurement intelligence · carbon-aware decisions</div>
+      </div>
+      <div class="domain-badge">
+        <span class="dot"></span>
+        <span>MANUFACTURING WORKSPACE</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="control-item">
+        <label for="scenario">Workspace scenario</label>
+        <select id="scenario" class="top-select"></select>
+      </div>
+      <div class="control-item">
+        <label for="role">Demo access · production uses SSO</label>
+        <select id="role" class="top-select">
+          <option value="procurement_manager">Procurement Manager (Full Sign-off)</option>
+          <option value="analyst">Procurement Analyst (Read/Draft Only)</option>
+        </select>
+      </div>
+      <div class="control-item">
+        <label>Pitch presentation</label>
+        <div style="display:flex;gap:6px;">
+          <a href="/presentation" target="_blank" class="top-select" style="display:inline-flex;align-items:center;justify-content:center;min-width:auto;padding:6px 12px;text-decoration:none;color:#34d399;font-weight:700;" title="Open interactive 19-slide presentation in browser">🖥️ Slides</a>
+          <a href="/EcoPulse_Enterprise_Presentation.pptx" download class="top-select" style="display:inline-flex;align-items:center;justify-content:center;min-width:auto;padding:6px 12px;text-decoration:none;color:#fff;font-weight:700;" title="Download editable PowerPoint PPTX file">📥 .PPTX</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MANAGER OVERVIEW -->
+<section class="hero-banner">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-eyebrow"><span class="hero-live-dot"></span> ECOPULSE / PROCUREMENT INTELLIGENCE</div>
+      <h2>Buy better.<br><em>Know why.</em></h2>
+      <p>Every supplier decision brings price, delivery and carbon evidence together. EcoPulse screens the offers, prepares a recommendation, and leaves the final call with your manager.</p>
+      <a class="hero-link" href="#orderWorkspace">Start a supplier review <span aria-hidden="true">↗</span></a>
+      <div class="hero-trust">Synthetic demonstration data · No purchase orders transmitted</div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+      <div class="signal-card signal-one"><small>01 / INGEST</small><strong>Evidence received</strong><span>Sources, dates & units</span></div>
+      <div class="signal-card signal-two"><small>02 / DECIDE</small><strong>Constraints checked</strong><span>Price · lead time · footprint</span></div>
+      <div class="signal-card signal-three"><small>03 / APPROVE</small><strong>Manager in control</strong><span>Draft only · audit saved</span></div>
+      <div class="hero-core"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><circle cx="50" cy="50" r="38" stroke="currentColor" stroke-width="1.2" opacity=".5"/><path d="M18 52h17l9-20 12 37 11-21h15" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+  </div>
+  <div class="hero-ticker"><div class="ticker-track"><span>MESSY EVIDENCE → CLEAR COMPARISON</span><span>GEMINI PROPOSES · PYTHON CHECKS · MANAGER APPROVES</span><span>EVERY EXCEPTION HAS A REASON</span><span>MESSY EVIDENCE → CLEAR COMPARISON</span><span>GEMINI PROPOSES · PYTHON CHECKS · MANAGER APPROVES</span><span>EVERY EXCEPTION HAS A REASON</span></div></div>
+</section>
+
+<!-- PRACTICAL SCENARIO SHORTCUTS -->
+<section class="demo-showcase-bar">
+  <div class="showcase-inner">
+    <div class="showcase-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      <span>Try a real decision change</span>
+    </div>
+    <div class="showcase-buttons">
+      <button class="demo-btn highlight" id="update" title="GreenForge changes from 18 to 14 days and wins recommendation">
+        Delivery update · 18 → 14 days
+      </button>
+      <button class="demo-btn" id="demoBoundaryBtn" title="Change GreenForge to gate-to-gate to show instant boundary mismatch exclusion">
+        Evidence boundary mismatch
+      </button>
+      <button class="demo-btn" id="demoCBAMBtn" title="Switch to Aluminium order to show unit conversion & EU CBAM flag">
+        Aluminium to EU · rule screen
+      </button>
+      <button class="demo-btn" id="demoEmailBtn" title="Load and parse messy supplier email">
+        Read a supplier note
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT SHELL -->
+<main class="shell" id="orderWorkspace">
+
+  <!-- SECTION 1: ORDER CONSTRAINTS -->
+  <section class="section">
+    <div class="section-head">
+      <div class="section-title">
+        <div class="kicker">01 / ORDER CONTEXT</div>
+        <h2>Define the purchase</h2>
+        <p class="hint">Quotes are total order prices in ₹ lakh. Carbon price is an internal planning assumption (shadow carbon price), not a statutory tax.</p>
+      </div>
+      <span class="badge neutral">DEMO DATA · NO ORDER SENT</span>
+    </div>
+
+    <div class="controls">
+      <div class="control"><label for="orderId">Order ID</label><input id="orderId"></div>
+      <div class="control"><label for="material">Material</label><input id="material"></div>
+      <div class="control"><label for="destination">Destination</label><select id="destination"><option>India</option><option>EU</option></select></div>
+      <div class="control"><label for="quantity">Quantity · tonnes</label><input id="quantity" type="number" min="1" step="any"></div>
+      <div class="control"><label for="budget">Budget · ₹ lakh</label><input id="budget" type="number" min="0" step="any"></div>
+      <div class="control"><label for="deadline">Deadline · days</label><input id="deadline" type="number" min="0" step="any"></div>
+      <div class="control"><label for="carbonLimit">Carbon Cap · kgCO₂e/t</label><input id="carbonLimit" type="number" min="0" step="any"><small>Hard ceiling for comparable footprints</small></div>
+      <div class="control"><button class="primary run" id="evaluate">✦ Run Agentic Evaluation</button></div>
+
+      <div class="control wide">
+        <label for="carbonSlider">Internal Shadow Carbon Price · ₹/tCO₂e</label>
+        <div class="slider-row">
+          <input id="carbonSlider" type="range" min="0" max="10000" step="500">
+          <input id="carbon" type="number" min="0" step="500">
+        </div>
+      </div>
+      <div class="control wide">
+        <label for="model">Agent Execution Mode</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input id="model" type="checkbox" checked style="width:auto">
+          <span>Use Gemini tool calls when configured; otherwise use rules preview</span>
+        </label>
+      </div>
+      <div class="control wide">
+        <label>System Status</label>
+        <div id="status" class="statusline" role="status">Choose a scenario or edit any offer to begin.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: SUPPLIER OFFERS TABLE -->
+  <section class="section">
+    <div class="section-head">
+      <div class="section-title">
+        <div class="kicker">02 / SUPPLIER OFFERS</div>
+        <h2>Compare the offers</h2>
+        <p class="hint">Edit any offer, then run the agent. Every exclusion comes with a reason.</p>
+      </div>
+      <button class="secondary" id="add">+ Add Supplier</button>
+    </div>
+
+    <div class="tablewrap">
+      <table id="offersTable">
+        <thead>
+          <tr>
+            <th>Supplier / ID</th>
+            <th>Total Quote / Unit Price</th>
+            <th>Lead Time</th>
+            <th>Reported Footprint</th>
+            <th>Footprint Unit</th>
+            <th>LCA Boundary</th>
+            <th>Evidence Date</th>
+            <th>Source Reference</th>
+            <th>Evaluation Status & Issues</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="suppliers"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 4: WORKSPACE & OUTCOME RESULTS (HIDDEN UNTIL EVALUATION) -->
+  <div id="results" class="hidden">
+
+    <div class="workspace">
+      <!-- Trace & Guardrails Column -->
+      <section class="section">
+        <div class="section-head">
+          <div class="section-title">
+            <div class="kicker">03 / DECISION TRAIL</div>
+            <h2>How EcoPulse reached this decision</h2>
+          </div>
+          <span id="modeBadge" class="badge model"></span>
+        </div>
+        <div class="trace-legend">
+          <span class="badge model">✦ Gemini</span> orchestrates tools and natural language extraction.
+          <span class="badge guard">▣ Python Guardrail</span> enforces math, limits, boundary logic and ranking.
+        </div>
+        <div id="trace"></div>
+      </section>
+
+      <!-- Manager Decision & Draft PO Column -->
+      <section class="section">
+        <div class="section-head">
+          <div class="section-title">
+            <div class="kicker">04 / MANAGER REVIEW</div>
+            <h2>Recommended action</h2>
+          </div>
+          <span id="decisionBadge" class="badge good"></span>
+        </div>
+
+        <div id="diff"></div>
+        <div id="recommendation"></div>
+
+        <!-- Cost and reported footprint comparison -->
+        <div style="margin:14px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <strong style="font-size:12px;color:var(--ink-secondary);text-transform:uppercase;letter-spacing:0.04em">Cost vs. reported footprint</strong>
+            <span class="tiny">Eligible and excluded offers</span>
+          </div>
+          <div class="plot" id="plot" role="img" aria-label="Eligible supplier price and emissions comparison"></div>
+        </div>
+
+        <div id="po"></div>
+        <div id="governance"></div>
+      </section>
+    </div>
+
+    <!-- Full Comparison Table -->
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">
+          <div class="kicker">EVIDENCE / COMPARISON</div>
+          <h2>Every supplier, every reason</h2>
+          <p class="hint">Every non-compliant offer displays the exact deterministic constraint violated.</p>
+        </div>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Supplier</th>
+              <th>Total Quote</th>
+              <th>Lead Delivery</th>
+              <th>Reported Footprint</th>
+              <th>Planning Score</th>
+              <th>Eligibility Outcome & Failure Reason</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Measured Prototype Metrics -->
+    <div class="metric-strip" id="metrics"></div>
+
+
+  </div>
+
+  <section class="section history-panel" aria-label="Recent decision history">
+    <div class="section-head"><div class="section-title"><div class="kicker">DECISION MEMORY</div><h2>Recent decisions</h2><p class="hint">Each completed evaluation is saved. Select a decision to review its inputs, outcome and approval.</p></div><button class="secondary" id="refreshHistory">Refresh</button></div>
+    <div id="history" class="history-list" aria-live="polite"><p class="hint">Loading saved decisions…</p></div>
+    <div id="historyReview" class="history-review hidden" aria-live="polite"></div>
+  </section>
+
+  <!-- SECTION 3: AI UNSTRUCTURED EVIDENCE INTAKE -->
+  <section class="section">
+    <div class="section-head">
+      <div class="section-title">
+        <div class="kicker">OPTIONAL / SUPPLIER EVIDENCE</div>
+        <h2>Bring in an unstructured quote</h2>
+        <p class="hint">Ingest unformatted supplier emails, quotes or .txt/.csv data. Gemini extracts structured fields for mandatory human verification.</p>
+      </div>
+      <span class="badge warn">AI draft requires human confirmation</span>
+    </div>
+
+    <div class="evidence-grid">
+      <div>
+        <label class="drop" for="evidenceFile">
+          <b>Choose or drop supplier evidence file</b><br>
+          <small>Plain text (.txt) or comma-separated (.csv) up to 100 KB. PDF upload is unavailable; paste text from a PDF manually.</small>
+          <input id="evidenceFile" type="file" accept=".txt,.csv,text/plain,text/csv">
+        </label>
+        <p class="tiny" id="fileName">No file selected</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="secondary" id="sampleNote">Load Sample Supplier Email</button>
+          <button class="primary" id="extract">✦ Extract Fields with Gemini</button>
+        </div>
+        <p class="tiny" id="extractStatus" role="status" style="font-weight:600"></p>
+      </div>
+    </div>
+
+    <textarea id="supplierNote" rows="3" aria-label="Supplier note text" placeholder="Paste unformatted supplier email, lead time update, or emissions declaration here..."></textarea>
+
+    <div id="extractPreview" class="preview hidden">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <b style="font-size:13.5px;color:var(--cgi-navy)">Proposed Draft Fields · Verify Before Adding</b>
+        <span class="badge guard">Human-in-the-loop gate</span>
+      </div>
+      <p class="hint" id="extractWarnings" style="color:var(--amber);font-weight:550"></p>
+      <div id="extractedFields" class="preview-grid"></div>
+      <div style="display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap">
+        <button class="primary" id="confirmOffer">Confirm and Add Offer to Order</button>
+        <span class="tiny">Human confirmation commits the offer into the active pool. It does not auto-generate or approve a PO.</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">EcoPulse Enterprise · Manufacturing procurement decision support · Synthetic supplier data · No live ERP or supplier transmission</footer>
+
+<script>
+let fixtures=[],current=null,report=null,previousReport=null,customOrder=null;
+const $=id=>document.getElementById(id);
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=v=>'₹'+Number(v).toLocaleString('en-IN',{maximumFractionDigits:2});
+const ist=iso=>iso?new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'}).format(new Date(iso)):'—';
+const fields=['name','id','quote_lakh','lead_days','emissions','emission_unit','boundary','evidence_date','source'];
+const extractKeys=[...fields,'ship_from'];
+const sample='Supplier email from RenewMetal India (ID S-D) for order STEEL-101: total quote ₹61 lakh for 100 tonnes of steel, delivery in 13 days. Our cradle-to-gate product footprint is 180 tCO2e according to EPD-RM-26 dated 2026-09-30. Ships from India.';
+
+function updateStepper(_step){}
+
+function statusFor(s){
+  const x=report?.suppliers.find(r=>r.id===s.id);
+  if(!x) return {label:'Pending evaluation',kind:'neutral',reason:''};
+  if(report.selected?.id===s.id) return {label:'★ Recommended Winner',kind:'good',reason:'Lowest internal planning score among eligible offers'};
+  if(x.issues.length){
+    const stale=x.issues.some(v=>v.includes('date window')||v.includes('invalid evidence date'));
+    const reason=x.issues.map(v=>
+      v==='Misses delivery deadline'?`${s.lead_days} days > ${current.max_days}-day limit`:
+      v==='Over quote budget'?`${money(s.quote_lakh)} lakh > ${money(current.budget_lakh)} lakh budget`:
+      v==='Incomparable footprint boundary'?`Boundary ${s.boundary} differs from required ${current.required_boundary}`:
+      v==='Exceeds carbon intensity limit'?`${x.carbon_intensity_kg_t} kgCO₂e/t > ${current.max_carbon_intensity_kg_t} limit`:
+      v
+    ).join('; ');
+    return {label:stale?'Stale Evidence':'Disqualified',kind:stale?'warn':'bad',reason};
+  }
+  return {label:'Eligible',kind:'good',reason:'Meets all commercial & carbon constraints'};
+}
+
+function unitPrice(s){
+  let q=Number($('quantity').value);
+  return Number.isFinite(q)&&q>0?`${money(Number(s.quote_lakh)*100000/q)}/t`:'—';
+}
+
+function renderSuppliers(){
+  $('suppliers').innerHTML=current.suppliers.map((s,i)=>{
+    let st=statusFor(s);
+    let isWinner=report?.selected?.id===s.id;
+    let unitAlert=s.emission_unit==='kgCO2e'?'<span class="tiny" style="color:var(--blue);font-weight:600">Auto-normalized to tCO₂e</span>':'';
+    let boundaryAlert=s.boundary==='gate-to-gate'?'<span class="tiny" style="color:var(--amber);font-weight:600">Scope Incompatible</span>':'';
+
+    return `<tr class="${isWinner?'winner-row':''}">
+      <td>
+        <input aria-label="Supplier name" data-i="${i}" data-key="name" value="${esc(s.name)}" style="font-weight:700">
+        <input aria-label="Supplier ID" data-i="${i}" data-key="id" value="${esc(s.id)}" style="margin-top:4px;width:75px;font-size:11px;color:var(--muted)">
+      </td>
+      <td>
+        <input aria-label="Total quote in lakh" data-i="${i}" data-key="quote_lakh" type="number" step="any" value="${esc(s.quote_lakh)}">
+        <small class="unit-price">${esc(unitPrice(s))}</small>
+      </td>
+      <td>
+        <input aria-label="Lead days" data-i="${i}" data-key="lead_days" type="number" step="any" value="${esc(s.lead_days)}">
+        <span class="tiny">days</span>
+      </td>
+      <td>
+        <input aria-label="Emissions" data-i="${i}" data-key="emissions" type="number" step="any" value="${esc(s.emissions??'')}">
+        ${unitAlert}
+      </td>
+      <td>
+        <select aria-label="Footprint unit" data-i="${i}" data-key="emission_unit">
+          <option value="" ${!s.emission_unit?'selected':''}>Select unit</option>
+          <option ${s.emission_unit==='tCO2e'?'selected':''}>tCO2e</option>
+          <option ${s.emission_unit==='kgCO2e'?'selected':''}>kgCO2e</option>
+          ${s.emission_unit&&!'tCO2e,kgCO2e'.split(',').includes(s.emission_unit)?`<option selected>${esc(s.emission_unit)}</option>`:''}
+        </select>
+      </td>
+      <td>
+        <select aria-label="Boundary" data-i="${i}" data-key="boundary">
+          <option value="" ${!s.boundary?'selected':''}>Select boundary</option>
+          <option ${s.boundary==='cradle-to-gate'?'selected':''}>cradle-to-gate</option>
+          <option ${s.boundary==='gate-to-gate'?'selected':''}>gate-to-gate</option>
+          ${s.boundary&&!'cradle-to-gate,gate-to-gate'.split(',').includes(s.boundary)?`<option selected>${esc(s.boundary)}</option>`:''}
+        </select>
+        ${boundaryAlert}
+      </td>
+      <td><input aria-label="Evidence date" data-i="${i}" data-key="evidence_date" type="date" value="${esc(s.evidence_date)}"></td>
+      <td><input aria-label="Evidence source" data-i="${i}" data-key="source" value="${esc(s.source)}" placeholder="EPD / ISO doc"></td>
+      <td>
+        <span class="badge ${st.kind}">${esc(st.label)}</span>
+        <div class="reason">${esc(st.reason)}</div>
+      </td>
+      <td><button class="secondary small" data-remove="${i}" aria-label="Remove ${esc(s.name)}" title="Remove offer">&times;</button></td>
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{
+    current=collect();
+    current.suppliers.splice(Number(b.dataset.remove),1);
+    report=null;
+    $('results').classList.add('hidden');
+    renderSuppliers();
+  });
+
+  document.querySelectorAll('[data-key="quote_lakh"]').forEach(el=>el.oninput=()=>{
+    let q=Number($('quantity').value),v=Number(el.value);
+    const upEl=el.parentElement.querySelector('.unit-price');
+    if(upEl) upEl.textContent=q>0?`${money(v*100000/q)}/t`:'—';
+  });
+}
+
+function renderOrder(o){
+  current=structuredClone(o);
+  report=null;
+  previousReport=null;
+  for(let [id,key] of [
+    ['orderId','id'],['material','material'],['destination','destination'],
+    ['quantity','quantity_t'],['budget','budget_lakh'],['deadline','max_days'],
+    ['carbonLimit','max_carbon_intensity_kg_t'],['carbon','internal_carbon_price_inr_t'],
+    ['carbonSlider','internal_carbon_price_inr_t']
+  ]){
+    $(id).value=o[key]??'';
+  }
+  renderSuppliers();
+  $('results').classList.add('hidden');
+  $('status').textContent='Order loaded. Edit inputs or run evaluation.';
+  updateStepper(1);
+}
+
+function collect(){
+  let o=structuredClone(current);
+  o.id=$('orderId').value.trim();
+  o.material=$('material').value.trim();
+  o.destination=$('destination').value;
+  o.quantity_t=Number($('quantity').value);
+  o.budget_lakh=Number($('budget').value);
+  o.max_days=Number($('deadline').value);
+  o.max_carbon_intensity_kg_t=$('carbonLimit').value===''?null:Number($('carbonLimit').value);
+  o.internal_carbon_price_inr_t=Number($('carbon').value);
+  document.querySelectorAll('[data-key]').forEach(el=>{
+    let k=el.dataset.key,s=o.suppliers[Number(el.dataset.i)];
+    if(s){
+      s[k]=['quote_lakh','lead_days','emissions'].includes(k)?(el.value===''?null:Number(el.value)):el.value;
+    }
+  });
+  return o;
+}
+
+function markDirty(){
+  if(!report)return;
+  report=null;
+  $('results').classList.add('hidden');
+  $('status').textContent='Inputs changed. Run evaluation for an updated decision.';
+  updateStepper(1);
+  document.querySelectorAll('#suppliers tr').forEach(tr=>{
+    tr.classList.remove('winner-row');
+    let badge=tr.querySelector('td:nth-child(9) .badge'),reason=tr.querySelector('td:nth-child(9) .reason');
+    if(badge){badge.className='badge neutral';badge.textContent='Pending changes'}
+    if(reason)reason.textContent='';
+  });
+}
+
+$('suppliers').addEventListener('input',markDirty);
+$('suppliers').addEventListener('change',markDirty);
+for(let id of ['orderId','material','destination','quantity','budget','deadline','carbonLimit','carbon']){
+  $(id).addEventListener('input',markDirty);
+  $(id).addEventListener('change',markDirty);
+}
+
+$('scenario').onchange=()=>{
+  let v=$('scenario').value;
+  if(v==='custom'){
+    customOrder=structuredClone(current?collect():fixtures[0]);
+    customOrder.id='CUSTOM-001';
+    renderOrder(customOrder);
+  } else {
+    renderOrder(fixtures[Number(v)]);
+  }
+};
+
+$('carbonSlider').oninput=()=>{
+  $('carbon').value=$('carbonSlider').value;
+  markDirty();
+};
+$('carbon').oninput=()=>{
+  $('carbonSlider').value=$('carbon').value;
+};
+$('quantity').oninput=()=>{
+  document.querySelectorAll('.unit-price').forEach((el,i)=>{
+    let input=document.querySelector(`[data-i="${i}"][data-key="quote_lakh"]`);
+    let q=Number($('quantity').value);
+    el.textContent=q>0?`${money(Number(input?.value)*100000/q)}/t`:'—';
+  });
+};
+
+$('add').onclick=()=>{
+  current=collect();
+  $('results').classList.add('hidden');
+  current.suppliers.push({
+    name:'New Supplier',
+    id:'N-'+(current.suppliers.length+1),
+    quote_lakh:0,
+    lead_days:0,
+    emissions:null,
+    emission_unit:'tCO2e',
+    boundary:'cradle-to-gate',
+    evidence_date:'',
+    source:'',
+    ship_from:'India'
+  });
+  report=null;
+  renderSuppliers();
+};
+
+/* Evaluator Quick Demos */
+$('update').onclick=()=>{
+  current=collect();
+  let x=current.suppliers.find(s=>s.id==='S-B');
+  if(!x){
+    $('status').textContent='GreenForge update applies to Scenario 1 (Steel). Switching now...';
+    $('scenario').value='0';
+    renderOrder(fixtures[0]);
+    x=current.suppliers.find(s=>s.id==='S-B');
+  }
+  x.lead_days=14;
+  report=null;
+  $('results').classList.add('hidden');
+  renderSuppliers();
+  $('status').textContent='GreenForge delivery lead time updated to 14 days (within 16d deadline). Click "Run Agentic Evaluation"!';
+  $('evaluate').focus();
+};
+
+$('demoBoundaryBtn').onclick=()=>{
+  current=collect();
+  let x=current.suppliers.find(s=>s.id==='S-B');
+  if(!x){
+    $('scenario').value='0';
+    renderOrder(fixtures[0]);
+    x=current.suppliers.find(s=>s.id==='S-B');
+  }
+  x.boundary=x.boundary==='gate-to-gate'?'cradle-to-gate':'gate-to-gate';
+  report=null;
+  $('results').classList.add('hidden');
+  renderSuppliers();
+  $('status').textContent=`GreenForge boundary flipped to "${x.boundary}". Run evaluation to observe boundary check guardrails.`;
+};
+
+$('demoCBAMBtn').onclick=()=>{
+  $('scenario').value='1';
+  renderOrder(fixtures[1]);
+  $('status').textContent='Loaded Aluminium order (EU Delivery). Demonstrates kg→t unit conversion, gate-to-gate exclusion, & EU CBAM screening.';
+};
+
+$('demoEmailBtn').onclick=()=>{
+  $('supplierNote').value=sample;
+  $('supplierNote').scrollIntoView({behavior:'smooth'});
+  $('extract').click();
+};
+
+/* AI Evidence Handling */
+$('sampleNote').onclick=()=>{
+  $('supplierNote').value=sample;
+};
+
+async function loadEvidenceFile(file){
+  if(!file)return;
+  if(!/\.(txt|csv)$/i.test(file.name)||file.size>100000){
+    $('fileName').textContent='Choose a .txt or .csv file under 100 KB.';
+    return;
+  }
+  $('supplierNote').value=await file.text();
+  $('fileName').textContent=`Loaded ${file.name} (${Math.round(file.size/1024)} KB). Verify before sending to Gemini.`;
+}
+
+$('evidenceFile').onchange=e=>loadEvidenceFile(e.target.files[0]);
+const drop=document.querySelector('.drop');
+drop.ondragover=e=>{e.preventDefault();drop.style.borderColor='var(--em)'};
+drop.ondragleave=()=>drop.style.borderColor='';
+drop.ondrop=e=>{e.preventDefault();drop.style.borderColor='';loadEvidenceFile(e.dataTransfer.files[0])};
+
+$('extract').onclick=async()=>{
+  let note=$('supplierNote').value.trim();
+  $('extractStatus').textContent='Reading note with Gemini generative model…';
+  $('extractPreview').classList.add('hidden');
+  $('extract').disabled=true;
+  try{
+    let res=await fetch('/api/extract',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:note})
+    });
+    let d=await res.json();
+    if(!res.ok) throw Error(d.error);
+    $('extractedFields').innerHTML=extractKeys.map(k=>`
+      <div>
+        <label>${esc(k.replaceAll('_',' '))}</label>
+        <input data-extract="${k}" value="${esc(d.candidate[k]??'')}">
+      </div>
+    `).join('');
+    $('extractWarnings').textContent=d.needs_review.length?
+      `Review missing or uncertain fields: ${d.needs_review.join(', ')}.`:
+      'All structured fields successfully parsed. Please review and verify before confirming.';
+    $('extractPreview').classList.remove('hidden');
+    $('extractStatus').textContent='AI draft ready · Human confirmation required';
+  } catch(e){
+    $('extractStatus').textContent='Error: '+e.message;
+  } finally{
+    $('extract').disabled=false;
+  }
+};
+
+$('confirmOffer').onclick=()=>{
+  let offer={};
+  document.querySelectorAll('[data-extract]').forEach(el=>{
+    let k=el.dataset.extract;
+    offer[k]=['quote_lakh','lead_days','emissions'].includes(k)?
+      (el.value.trim()===''?null:Number(el.value)):
+      el.value.trim();
+  });
+  current=collect();
+  if(!offer.id||current.suppliers.some(s=>s.id===offer.id)){
+    $('extractStatus').textContent='Enter a unique supplier ID before adding.';
+    return;
+  }
+  current.suppliers.push(offer);
+  report=null;
+  $('results').classList.add('hidden');
+  renderSuppliers();
+  $('extractPreview').classList.add('hidden');
+  $('extractStatus').textContent='Human confirmed offer added. Click "Run Agentic Evaluation".';
+};
+
+/* Run Agentic Evaluation */
+$('evaluate').onclick=async()=>{
+  let o=collect();
+  $('evaluate').disabled=true;
+  $('status').textContent='Ingesting supplier evidence and executing deterministic checks…';
+  try{
+    let res=await fetch('/api/evaluate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({order:o,use_model:$('model').checked})
+    });
+    let d=await res.json();
+    if(!res.ok) throw Error(d.error);
+    let before=previousReport;
+    current=o;
+    report=d;
+    renderSuppliers();
+    renderResult(d,before);
+    previousReport=d;
+    $('status').textContent=`Decision ${d.decision_id} complete · ${d.mode==='gemini_tool_calls'?'Live Gemini tool calls':d.mode==='model_tool_calls'?'Live model tools':'Deterministic rules preview'}`;
+    updateStepper(3);
+    loadRecentDecisions();
+    $('results').scrollIntoView({behavior:'smooth',block:'start'});
+  } catch(e){
+    $('status').textContent='Evaluation failed: '+e.message;
+  } finally{
+    $('evaluate').disabled=false;
+  }
+};
+
+function stepCopy(r){
+  let eu=r.rules.find(x=>x.id==='EU-CBAM-SCOPE');
+  let bad=r.suppliers.filter(x=>x.issues.length).map(x=>`${x.name}: ${x.issues.join(', ')}`);
+  let eligible=r.suppliers.filter(x=>x.carbon_ok&&x.commercial_ok).length;
+  return [
+    ['Data Ingestion & Verification',`${r.validation.supplier_count} supplier offers ingested for ${r.input_order.material}. Budget, quantity, and deadline checked.`],
+    ['Regulatory Rule Screening',eu?.relevant?'EU CBAM carbon scope flagged for expert review.':`Destination is ${r.input_order.destination} — EU CBAM scope not applicable.`],
+    ['Normalization & Guardrails',`${r.suppliers.filter(x=>x.carbon_ok).length} of ${r.suppliers.length} offers pass comparable emissions & boundary checks. ${bad.length?bad.join('; '):'No exceptions.'}`],
+    ['Ranking & Draft PO Action',r.selected?
+      (eligible===1?`${r.selected.name} is the sole qualified offer. Draft purchase order prepared for manager sign-off.`:
+      `${r.selected.name} achieves lowest internal planning score among ${eligible} eligible offers. Draft purchase order prepared for manager sign-off.`):
+      'Zero eligible suppliers meet commercial and carbon constraints. Action: request updated evidence or revise order budget/deadline.']
+  ];
+}
+
+function renderTrace(r){
+  let live=r.mode!=='rules_preview';
+  $('modeBadge').className='badge '+(live?'model':'neutral');
+  $('modeBadge').textContent=live?'✦ Live Gemini Tool Calls':'Rules Preview · Deterministic';
+  let steps=stepCopy(r);
+  $('trace').innerHTML=steps.map((v,i)=>`
+    <div class="trace-step">
+      <h3>Step ${i+1}: ${esc(v[0])}</h3>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+        <span class="badge ${live?'model':'neutral'}">${live?'✦ Gemini Tool Call':'Workflow Step'}</span>
+        <span class="badge guard">▣ Python Guardrail</span>
+      </div>
+      <p>${esc(v[1])}</p>
+    </div>
+  `).join('')+`
+    <details>
+      <summary>View Complete Machine Audit Trace (Auditor Inspection)</summary>
+      ${r.agent_trace.map((t,i)=>`
+        <details>
+          <summary>${i+1}. Tool: ${esc(t.tool)}</summary>
+          <pre>${esc(JSON.stringify(t.result,null,2))}</pre>
+        </details>
+      `).join('')}
+      <div style="margin-top:10px">
+        <strong class="tiny" style="color:#cbd5e1">Active Rule Screen & Assumptions:</strong>
+        <pre>${esc(JSON.stringify({decision_id:r.decision_id,rules:r.rules,assumptions:r.assumptions},null,2))}</pre>
+      </div>
+    </details>
+  `;
+}
+
+/* Enhanced Cost vs Carbon Pareto Scatter Plot */
+function scatter(r){
+  let all=r.suppliers;
+  let eligible=all.filter(x=>x.carbon_ok&&x.commercial_ok&&x.emissions_t!==null);
+  if(!eligible.length && !all.some(x=>x.emissions_t!==null)){
+    return '<div class="hint" style="padding:40px;text-align:center">No comparable footprint data available to plot.</div>';
+  }
+
+  let withEmissions=all.filter(x=>x.emissions_t!==null);
+  let minX=Math.min(...all.map(x=>x.quote_lakh))-2;
+  let maxX=Math.max(...all.map(x=>x.quote_lakh))+2;
+  let minY=Math.max(0,Math.min(...withEmissions.map(x=>x.emissions_t))-30);
+  let maxY=Math.max(...withEmissions.map(x=>x.emissions_t))+30;
+
+  if(minX>=maxX){minX-=5;maxX+=5;}
+  if(minY>=maxY){minY=0;maxY+=50;}
+
+  let X=v=>60+(v-minX)/(maxX-minX)*440;
+  let Y=v=>190-(v-minY)/(maxY-minY)*145;
+
+  let budgetX=X(Number(r.input_order.budget_lakh));
+
+  return `<svg viewBox="0 0 560 230" role="img" aria-label="Cost versus Scope 3 emissions Pareto frontier">
+    <!-- Grid & Thresholds -->
+    <line x1="60" y1="20" x2="60" y2="195" stroke="#cbd5e1" stroke-width="1.5"/>
+    <line x1="60" y1="195" x2="520" y2="195" stroke="#cbd5e1" stroke-width="1.5"/>
+
+    <!-- Budget Threshold Line -->
+    ${budgetX<=520 && budgetX>=60?`
+      <line x1="${budgetX}" y1="20" x2="${budgetX}" y2="195" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <text x="${budgetX+4}" y="32" font-size="10" font-weight="700" fill="#dc2626">Budget Cap (₹${r.input_order.budget_lakh}L)</text>
+    `:''}
+
+    <!-- Axis Labels -->
+    <text x="360" y="218" font-size="11" font-weight="650" fill="#475569">Total Order Quote (₹ Lakh) →</text>
+    <text x="10" y="16" font-size="10.5" font-weight="650" fill="#475569">tCO₂e ↑</text>
+
+    <!-- Suppliers Plot -->
+    ${all.map(x=>{
+      if(x.emissions_t===null) return '';
+      let isWinner=x.id===r.selected?.id;
+      let isEligible=x.carbon_ok && x.commercial_ok;
+      let cx=X(x.quote_lakh);
+      let cy=Y(x.emissions_t);
+
+      if(isWinner){
+        return `
+          <circle cx="${cx}" cy="${cy}" r="14" fill="rgba(16,185,129,0.2)"/>
+          <circle cx="${cx}" cy="${cy}" r="8" fill="#059669" stroke="#fff" stroke-width="2"/>
+          <text x="${Math.min(430,cx+12)}" y="${Math.max(26,cy-8)}" font-size="11.5" font-weight="800" fill="#064e3b">★ ${esc(x.name)} (Winner)</text>
+          <text x="${Math.min(430,cx+12)}" y="${Math.max(38,cy+5)}" font-size="10" font-weight="600" fill="#059669">₹${x.quote_lakh}L · ${x.emissions_t} tCO₂e</text>
+        `;
+      } else if(isEligible){
+        return `
+          <circle cx="${cx}" cy="${cy}" r="6" fill="#3b82f6" stroke="#fff" stroke-width="1.5"/>
+          <text x="${Math.min(450,cx+10)}" y="${Math.max(30,cy+4)}" font-size="10.5" font-weight="600" fill="#1e293b">${esc(x.name)}</text>
+        `;
+      } else {
+        return `
+          <circle cx="${cx}" cy="${cy}" r="5" fill="#94a3b8" stroke="#cbd5e1" stroke-width="1"/>
+          <text x="${Math.min(450,cx+9)}" y="${Math.max(30,cy+4)}" font-size="10" fill="#64748b">${esc(x.name)} (Disqualified)</text>
+        `;
+      }
+    }).join('')}
+
+    <!-- Legend -->
+    <g transform="translate(68,22)">
+      <circle cx="6" cy="6" r="5" fill="#059669"/>
+      <text x="16" y="10" font-size="10" font-weight="600" fill="#0f172a">Recommended</text>
+      <circle cx="110" cy="6" r="5" fill="#3b82f6"/>
+      <text x="120" y="10" font-size="10" font-weight="600" fill="#0f172a">Eligible</text>
+      <circle cx="180" cy="6" r="5" fill="#94a3b8"/>
+      <text x="190" y="10" font-size="10" font-weight="600" fill="#0f172a">Disqualified</text>
+    </g>
+  </svg>`;
+}
+
+function renderResult(r,before){
+  $('results').classList.remove('hidden');
+  renderTrace(r);
+  let s=r.selected,cmp=r.comparison;
+  let changed=before?.input_order?.id===r.input_order.id && before.selected?.id!==s?.id;
+
+  if(changed && before.selected && s){
+    let dq=+(s.quote_lakh-before.selected.quote_lakh).toFixed(2);
+    let de=+(s.emissions_t-before.selected.emissions_t).toFixed(2);
+    let abatementRate=de<0?Math.round((dq*100000)/Math.abs(de)):'—';
+    $('diff').innerHTML=`
+      <div class="diff">
+        <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:#064e3b;margin-bottom:4px">
+          <span>⚡ Dynamic Decision Flip:</span>
+          <span>${esc(before.selected.name)} → ${esc(s.name)}</span>
+        </div>
+        <div>
+          Quote differential: <b>${dq>=0?'+':''}${money(dq)} lakh</b> ·
+          Reported footprint difference: <b>${de>=0?'+':''}${de} tCO₂e</b> (${de<0?Math.abs(Math.round((de/before.selected.emissions_t)*100))+'% cleaner':''}) ·
+          Net Abatement Cost: <b>${abatementRate!=='—'?'₹'+abatementRate.toLocaleString('en-IN')+'/tCO₂e':abatementRate}</b> (internal planning comparison)
+        </div>
+      </div>
+    `;
+  } else {
+    $('diff').innerHTML='';
+  }
+
+  $('decisionBadge').className='badge '+(s?'good':'warn');
+  $('decisionBadge').textContent=s?'Recommended · Pending Approval':'Review Needed · No Qualified Offer';
+
+  $('recommendation').innerHTML=s?`
+    <div class="recommend">
+      <span>${esc(s.name)}</span>
+      <span class="badge good" style="font-size:12px">Score: ${money(s.planning_score_lakh)} lakh</span>
+    </div>
+    <div class="facts">
+      <div class="fact">
+        <strong>${money(s.quote_lakh)} lakh</strong>
+        <small>Total Purchase Quote</small>
+      </div>
+      <div class="fact">
+        <strong>${s.lead_days} Days</strong>
+        <small>Delivery Lead Time</small>
+      </div>
+      <div class="fact">
+        <strong>${s.emissions_t} tCO₂e</strong>
+        <small>Scope 3 Footprint (${s.carbon_intensity_kg_t} kg/t)</small>
+      </div>
+    </div>
+    <p style="font-size:13px;line-height:1.5;color:var(--ink-secondary)">${esc(r.explanation)}</p>
+    ${cmp?`
+      <div class="hint" style="background:#f8fafc;padding:8px 12px;border-radius:6px;border:1px solid var(--line);margin-bottom:8px">
+        <b>Trade-off vs Baseline (${esc(cmp.vs)}):</b> Quote difference ${cmp.quote_difference_lakh>=0?'+':''}${money(cmp.quote_difference_lakh)} lakh; Reported footprint difference: ${cmp.emission_difference_t>=0?'+':''}${cmp.emission_difference_t} tCO₂e.
+      </div>
+    `:''}
+    <p class="tiny">Internal Planning Score combines commercial quote with shadow carbon valuation (₹${money(r.assumptions.internal_carbon_price_inr_t)}/t). It is a strategic ranking index, not an invoice cost.</p>
+  `:`<div class="notice"><b>No qualified offer.</b> ${esc(r.explanation)}</div>`;
+
+  $('plot').innerHTML=scatter(r);
+
+  $('po').innerHTML=s?`
+    <div class="po">
+      <span class="badge good">Evidence screened · synthetic draft</span>
+      <h3>Purchase Order Draft: ${esc('DRAFT-'+r.decision_id.toUpperCase())}</h3>
+      <dl>
+        <div><dt>Recommended Vendor</dt><dd>${esc(s.name)} (${esc(s.id)})</dd></div>
+        <div><dt>Total Quoted Cost</dt><dd>${money(s.quote_lakh)} lakh</dd></div>
+        <div><dt>Delivery Quantity</dt><dd>${r.input_order.quantity_t} Tonnes (${esc(r.input_order.material)})</dd></div>
+        <div><dt>Unit Purchase Price</dt><dd>${money(s.quote_lakh*100000/r.input_order.quantity_t)} / Tonne</dd></div>
+        <div><dt>Reported Carbon Footprint</dt><dd>${s.emissions_t} tCO₂e (${s.boundary})</dd></div>
+        <div><dt>Supplier Evidence Source</dt><dd>${esc(s.source||'No source')}</dd></div>
+      </dl>
+    </div>
+  `:'';
+
+  let eu=r.rules.find(x=>x.id==='EU-CBAM-SCOPE');
+  $('governance').innerHTML=`
+    <div class="notice">
+      <b>Regulatory Rule Check:</b> ${eu?.relevant?
+        '<b>EU CBAM Scope Flagged</b> — Importer reporting rules require expert verification prior to dispatch.':
+        'Destination is India — EU CBAM reporting not triggered.'}
+      Internal shadow carbon price is ₹${money(r.assumptions.internal_carbon_price_inr_t)}/tCO₂e.
+    </div>
+    <p style="margin:10px 0 6px">
+      <b>PO Dispatch State:</b> <span id="poState">${s?'Draft pending Procurement Manager sign-off':'No draft created'}</span>
+    </p>
+    <label for="note" class="tiny" style="font-weight:600;display:block;margin-bottom:4px">Manager Approval / Audit Rationale:</label>
+    <input id="note" placeholder="e.g. Approved: GreenForge delivery acceleration meets assembly line schedule with lowest carbon footprint.">
+    <div class="actions approval-actions">
+      <button class="primary" id="approve" ${s?'':'disabled'}>✓ Approve Purchase Order Draft</button>
+      <button class="danger" id="reject">✕ Reject / Request Revisions</button>
+      <button class="secondary" id="openReport">Open decision report</button>
+      <button class="secondary" id="exportRecord">Download JSON record</button>
+    </div>
+    <div class="audit">
+      <p id="approvalState">Decision Record ID: <b>${esc(r.decision_id)}</b> · Evaluated at ${esc(ist(r.created_at))} IST</p>
+      <p class="tiny">Demo role selector only; no secure authentication or ERP integration. No purchase order is transmitted.</p>
+    </div>
+  `;
+
+  $('approve').disabled=!s||$('role').value!=='procurement_manager';
+  $('reject').disabled=$('role').value!=='procurement_manager';
+  $('approve').onclick=()=>decide('approve');
+  $('reject').onclick=()=>decide('reject');
+  $('openReport').onclick=()=>window.open('/report?id='+encodeURIComponent(r.decision_id),'_blank','noopener');
+  $('exportRecord').onclick=async()=>{
+    try{
+      let res=await fetch('/api/record?id='+encodeURIComponent(r.decision_id));
+      if(!res.ok) throw Error('Record unavailable');
+      let payload=await res.json();
+      let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ecopulse-decision-${r.decision_id}.json`;a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    }catch(e){$('approvalState').textContent='Could not download record: '+e.message}
+  };
+
+  $('resultsTable').innerHTML=r.suppliers.map(x=>`
+    <tr class="${x.id===s?.id?'winner-row':''}">
+      <td><b>${esc(x.name)}</b><br><small style="color:var(--muted)">${esc(x.id)}</small></td>
+      <td>${money(x.quote_lakh)} lakh</td>
+      <td>${x.lead_days} days</td>
+      <td>${x.emissions_t!==null?x.emissions_t+' tCO₂e':'—'}<br><small style="color:var(--muted)">${x.carbon_intensity_kg_t!==null?x.carbon_intensity_kg_t+' kg/t':'—'}</small></td>
+      <td>${x.planning_score_lakh===null?'—':money(x.planning_score_lakh)+' lakh'}</td>
+      <td>
+        <span class="badge ${x.id===s?.id?'good':x.issues.length?'bad':'neutral'}">
+          ${x.id===s?.id?'★ Recommended Winner':x.issues.length?'Disqualified':'Eligible'}
+        </span>
+        <div class="reason">${esc(x.issues.join('; '))}</div>
+      </td>
+    </tr>
+  `).join('');
+
+  let completeness=r.suppliers.filter(x=>x.carbon_ok).length;
+  let eligibleCount=r.suppliers.filter(x=>x.carbon_ok&&x.commercial_ok).length;
+  $('metrics').innerHTML=`
+    <div class="metric">
+      <strong>${completeness}/${r.suppliers.length}</strong>
+      <span>Comparable Evidence (source, date and boundary screened)</span>
+    </div>
+    <div class="metric">
+      <strong>${eligibleCount}</strong>
+      <span>Fully Qualified Suppliers</span>
+    </div>
+    <div class="metric">
+      <strong>${Number(r.run_seconds??0).toFixed(2)} s</strong>
+      <span>Agent Evaluation Cycle Time</span>
+    </div>
+    <div class="metric"><strong>${r.rules.filter(x=>x.relevant).length}</strong><span>Rule flags for expert review</span></div>
+  `;
+
+
+}
+
+$('role').onchange=()=>{
+  if(report){
+    let allowed=$('role').value==='procurement_manager';
+    $('approve').disabled=!allowed||!report.selected||!!report.approval;
+    $('reject').disabled=!allowed||!!report.approval;
+  }
+};
+
+async function decide(action){
+  let res=await fetch('/api/decision',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      decision_id:report.decision_id,
+      role:$('role').value,
+      action,
+      note:$('note').value
+    })
+  });
+  let d=await res.json();
+  if(!res.ok){
+    $('approvalState').textContent='Could not record decision: '+d.error;
+    return;
+  }
+  report.approval=d;
+  $('poState').textContent=action==='approve'?
+    'Manager approved draft · not transmitted':
+    'Manager Rejected Draft · Revisions Requested';
+  $('approvalState').innerHTML=`<b>${action==='approve'?'Approval':'Rejection'} persisted to SQLite audit trail</b> · Decision ID ${report.decision_id} · ${ist(d.at)} IST`;
+  $('approve').disabled=true;
+  $('reject').disabled=true;
+  $('decisionBadge').textContent=action==='approve'?'Manager Approved':'Manager Rejected';
+  $('decisionBadge').className='badge '+(action==='approve'?'good':'warn');
+  updateStepper(4);
+  loadRecentDecisions();
+}
+
+/* Modal Controls */
+
+
+/* Initial Fetch */
+async function loadRecentDecisions(){
+  try{
+    const res=await fetch('/api/decisions',{cache:'no-store'});
+    if(!res.ok)throw Error(`History request failed (${res.status}). Restart the updated server.`);
+    const rows=await res.json();
+    $('history').innerHTML=rows.length?rows.map(d=>{
+      const label=d.status==='approve'?'Approved':d.status==='reject'?'Rejected':d.status==='needs review'?'Needs review':'Pending approval';
+      return `<button type="button" class="history-item" data-decision-id="${esc(d.decision_id)}"><span><b>${esc(d.order_id)} · ${esc(label)}</b><small>${esc(d.supplier||'No eligible supplier')} · ${esc(d.decision_id)}</small></span><span>${esc(ist(d.decided_at||d.created_at))} IST <span aria-hidden="true">↗</span></span></button>`;
+    }).join(''):'<p class="hint">No saved decisions yet. Run an evaluation to create the first record.</p>';
+  }catch(e){$('history').textContent='History could not be loaded: '+e.message}
+}
+async function reviewPastDecision(id){
+  const panel=$('historyReview');
+  panel.classList.remove('hidden');
+  panel.textContent='Loading saved decision…';
+  try{
+    const res=await fetch('/api/record?id='+encodeURIComponent(id),{cache:'no-store'});
+    if(!res.ok)throw Error('Saved decision unavailable');
+    const d=await res.json(),s=d.selected,a=d.approval,order=d.input_order||{};
+    const failures=(d.suppliers||[]).filter(x=>x.issues?.length).map(x=>`${x.name}: ${x.issues.join('; ')}`);
+    const status=a?(a.action==='approve'?'Approved by manager':'Rejected by manager'):(s?'Awaiting manager approval':'No eligible draft');
+    panel.innerHTML=`<h3>${esc(order.id||'Order')} · ${esc(status)}</h3>
+      <p><b>Recommendation:</b> ${s?`${esc(s.name)} · ₹${esc(s.quote_lakh)} lakh · ${esc(s.emissions_t)} tCO₂e`:'No supplier passed all checks.'}</p>
+      <p><b>Why:</b> ${esc(d.explanation||'Review the checks in the full report.')}</p>
+      <p><b>Exceptions:</b> ${failures.length?esc(failures.join(' | ')):'None recorded.'}</p>
+      <p><b>Manager decision:</b> ${a?`${esc(a.action)} · ${esc(a.note||'No note')} · ${esc(ist(a.at))} IST`:'Pending'}</p>
+      <p class="tiny">Decision ID ${esc(d.decision_id)} · ${esc(ist(d.created_at))} IST</p>
+      <div class="actions"><a class="secondary" href="/report?id=${encodeURIComponent(id)}" target="_blank" rel="noopener">Open full decision report ↗</a></div>`;
+    panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }catch(e){panel.textContent='Could not open review: '+e.message}
+}
+$('history').addEventListener('click',e=>{
+  const item=e.target.closest('[data-decision-id]');
+  if(item)reviewPastDecision(item.dataset.decisionId);
+});
+$('refreshHistory').onclick=loadRecentDecisions;
+loadRecentDecisions();
+fetch('/api/fixtures').then(r=>r.json()).then(d=>{
+  fixtures=d;
+  $('scenario').innerHTML=`
+    <option value="0">Scenario 1: Bengaluru Plant — Steel (100t)</option>
+    <option value="1">Scenario 2: EU Export — Aluminium & CBAM (40t)</option>
+    <option value="custom">Scenario 3: Custom Judge-Defined Sandbox</option>
+  `;
+  renderOrder(d[0]);
+}).catch(e=>$('status').textContent='Unable to load scenario fixtures: '+e.message);
+</script>
+</body>
+</html>

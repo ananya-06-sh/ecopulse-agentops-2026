@@ -20,8 +20,25 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed=urlsplit(self.path)
         if parsed.path=='/': return self.send(200,(ROOT/'index.html').read_text(encoding='utf-8'),'text/html')
+        if parsed.path in ('/presentation','/slides'):
+            p = ROOT/'presentation.html'
+            return self.send(200,p.read_text(encoding='utf-8'),'text/html') if p.exists() else self.send(404,{"error":"Presentation HTML not found"})
+        if parsed.path in ('/presentation.pptx','/download-presentation','/EcoPulse_Enterprise_Presentation.pptx'):
+            pptx_path = ROOT/'EcoPulse_Enterprise_Presentation.pptx'
+            if pptx_path.exists():
+                data = pptx_path.read_bytes()
+                self.send_response(200)
+                self.send_header('Content-Type','application/vnd.openxmlformats-officedocument.presentationml.presentation')
+                self.send_header('Content-Length',str(len(data)))
+                self.send_header('Content-Disposition','attachment; filename="EcoPulse_Enterprise_Presentation.pptx"')
+                self.send_header('Cache-Control','no-store')
+                self.end_headers()
+                self.wfile.write(data)
+                return
+            return self.send(404,{"error":"Presentation PPTX not found"})
         if parsed.path=='/api/fixtures': return self.send(200,FIXTURES)
         if parsed.path=='/api/audit': return self.send(200,store.audit())
+        if parsed.path=='/api/decisions': return self.send(200,store.recent_decisions())
         if parsed.path=='/api/record':
             did=parse_qs(parsed.query).get('id',[''])[0]
             report=store.get(did)

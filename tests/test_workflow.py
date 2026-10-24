@@ -53,6 +53,14 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("Print or save as PDF",page)
         self.assertNotIn("<script>alert(1)</script>",page)
 
+    def test_carbon_intensity_cap_is_a_hard_limit(self):
+        order=json.loads(json.dumps(SCENARIOS[0]))
+        order["max_carbon_intensity_kg_t"]=2000
+        report=evaluate(order)
+        self.assertIsNone(report["selected"])
+        self.assertIn("Exceeds carbon intensity limit",report["suppliers"][0]["issues"])
+        self.assertEqual(report["suppliers"][0]["carbon_intensity_kg_t"],2400)
+
 
 if __name__ == "__main__":
     unittest.main()

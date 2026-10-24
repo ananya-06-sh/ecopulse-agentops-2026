@@ -67,3 +67,28 @@ def audit(limit=100, path=DB_PATH):
     with connect(path) as db:
         rows = db.execute("SELECT at, event, detail FROM audit ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
     return [{"at": at, "event": event, "detail": json.loads(detail)} for at, event, detail in rows]
+
+
+def recent_decisions(limit=12, path=DB_PATH):
+    """One row per saved evaluation; approvals update the same decision."""
+    with connect(path) as db:
+        rows = db.execute(
+            "SELECT id, report, created_at FROM decisions ORDER BY created_at DESC, rowid DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+    summaries = []
+    for decision_id, payload, created_at in rows:
+        report = json.loads(payload)
+        order = report.get("input_order") or {}
+        selected = report.get("selected") or {}
+        approval = report.get("approval") or {}
+        summaries.append({
+            "decision_id": decision_id,
+            "order_id": order.get("id", ""),
+            "material": order.get("material", ""),
+            "supplier": selected.get("name"),
+            "status": approval.get("action") or ("pending approval" if selected else "needs review"),
+            "created_at": created_at,
+            "decided_at": approval.get("at"),
+        })
+    return summaries

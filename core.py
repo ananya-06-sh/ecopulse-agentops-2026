@@ -4,11 +4,9 @@ from decimal import Decimal, InvalidOperation
 import copy
 import hashlib
 import json
+from pathlib import Path
 
-RULES = [
-    {"id":"EU-CBAM-SCOPE","title":"EU CBAM scope screening","materials":["steel","aluminium"],"destination":"EU","source_url":"https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en","note":"Potential reporting relevance for an EU import; legal applicability and obligations require expert verification."},
-    {"id":"INTERNAL-CARBON","title":"Illustrative internal carbon price","materials":["steel","aluminium"],"destination":"any","source_url":"internal planning assumption","note":"₹4,000/tCO₂e is a scenario assumption, not a tax, fine, or statutory rate."}
-]
+RULES = json.loads((Path(__file__).resolve().parent / "data" / "rules.json").read_text(encoding="utf-8"))
 
 def number(v, label):
     try:
@@ -48,7 +46,7 @@ def tool_normalize_and_check(order):
             else: issues.append("Unknown emissions unit")
             if not s.get("source"): issues.append("Missing source reference")
             try:
-                age=(date(2026,10,24)-date.fromisoformat(s.get("evidence_date",""))).days
+                age=(date.today()-date.fromisoformat(s.get("evidence_date",""))).days
                 if age < 0 or age > 365: issues.append("Emission evidence outside valid date window")
             except ValueError: issues.append("Missing or invalid evidence date")
             if s.get("boundary") != order.get("required_boundary","cradle-to-gate"): issues.append("Incomparable footprint boundary")

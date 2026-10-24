@@ -1,0 +1,18 @@
+[
+  {
+    "id": "EU-CBAM-SCOPE",
+    "title": "EU CBAM scope screening",
+    "materials": ["steel", "aluminium"],
+    "destination": "EU",
+    "source_url": "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
+    "note": "Potential reporting relevance for an EU import; legal applicability and obligations require expert verification."
+  },
+  {
+    "id": "INTERNAL-CARBON",
+    "title": "Illustrative internal carbon price",
+    "materials": ["steel", "aluminium"],
+    "destination": "any",
+    "source_url": "internal planning assumption",
+    "note": "The order-specific internal price is a scenario assumption, not a tax, fine, or statutory rate."
+  }
+]

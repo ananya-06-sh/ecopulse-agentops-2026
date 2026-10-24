@@ -1,6 +1,6 @@
 # EcoPulse Enterprise — AgentOps 2026 MVP
 
-A local procurement decision agent for **Manufacturing**. It ingests an order and supplier offers, checks delivery/price and carbon evidence, screens rule relevance, ranks comparable offers, drafts a purchase order, and records a human decision. **All supplied quotes and footprints are synthetic.** The internal carbon price is a planning assumption, not a tax or predicted fine.
+A local procurement decision agent for **Manufacturing**. It ingests an order and supplier offers, checks delivery/price and carbon evidence, screens rule relevance, ranks comparable offers, drafts a purchase order, and records a human decision. Gemini can also draft structured fields from a pasted supplier email or certificate text; a human confirms them before they enter the order. **All supplied quotes and footprints are synthetic.** The internal carbon price is a planning assumption, not a tax or predicted fine.
 
 ## Run in under two minutes
 
@@ -32,17 +32,22 @@ An API account with credits and network access is required. The key is read on t
 3. **Messy data:** Change GreenForge's boundary to `gate-to-gate`, rerun, and show why its low footprint cannot be compared. Restore or switch scenarios.
 4. **Second case:** AL-204 converts Nova's `520000 kgCO2e` to `520 tCO₂e`, excludes ReLoop's boundary mismatch, and flags potential EU CBAM scope for expert review. CircularMet is eligible and selected. The steel/India order does **not** flag EU CBAM.
 5. **Human control:** Show draft, manager approve/reject, audit record. It never sends a purchase order.
+6. **Unstructured evidence:** Click **Load sample note**, then **Extract fields with Gemini**. Review the draft values, confirm the new offer, and rerun the agent. This step requires a working Gemini API key; it never adds an offer automatically.
+7. **Persistent record:** Click **Open readable decision report** after approval. It opens a one-page browser report with **Print or save as PDF**. The decision and audit remain available after a server restart in `data/ecopulse.sqlite3` (local demo only; do not commit the database).
 
 ## Architecture and governance
 
-`index.html` is the local dashboard. `server.py` exposes the HTTP endpoints. `agent.py` asks Gemini or OpenAI to call four tools in a dependent loop when a key is present; every tool result is shown in the trace. `core.py` validates data, converts units, checks evidence date/source/boundary, screens a small sourced rule catalog, and ranks eligible offers. The final decision is recomputed by deterministic code, so model prose cannot override arithmetic. Approval is a local role demonstration, **not** production RBAC or authentication. The audit log is in memory and resets on restart. A deployed system would need real identity, persistent append-only audit, verified supplier feeds, policy versioning, and ERP approval integrations.
+`index.html` is the local dashboard. `server.py` exposes the HTTP endpoints. `agent.py` asks Gemini or OpenAI to call four tools in a dependent loop when a key is present; every tool result is shown in the trace. Gemini can propose fields from pasted supplier text, but the user must confirm them. `core.py` validates data, converts units, checks evidence date/source/boundary, screens the local `data/rules.json` catalog, and ranks eligible offers. The final decision is recomputed by deterministic code, so model prose cannot override arithmetic. `store.py` saves decisions and approval events in local SQLite. Approval is a local role demonstration, **not** production RBAC or authentication. A deployed system would need real identity, tamper-evident audit storage, verified supplier feeds, policy versioning, and ERP approval integrations.
 
 ### API
 
 - `GET /api/fixtures` — synthetic scenarios.
 - `POST /api/evaluate` — `{"order": <scenario object>, "use_model": true}`; returns decision, evidence, rule screen, model mode, tool trace.
 - `POST /api/decision` — `{"decision_id":"...","role":"procurement_manager","action":"approve","note":"..."}` or `reject`. Local approval only.
-- `GET /api/audit` — in-memory event trace.
+- `GET /api/audit` — recent persisted local audit events.
+- `POST /api/extract` — `{"text":"..."}`; Gemini drafts a supplier offer for human confirmation.
+- `GET /api/record?id=<decision_id>` — full saved decision record, including input order, checks, trace and approval.
+- `GET /report?id=<decision_id>` — readable, printable decision record for a manager or judge.
 
 ## Test
 
@@ -50,11 +55,13 @@ An API account with credits and network access is required. The key is read on t
 python -m unittest discover -s tests -v
 ```
 
-The six tests cover reranking on updated lead time, unit normalization, scope checks, incompatible boundaries, missing evidence, duplicate IDs, and keeping an incorrect model rationale out of the displayed summary. Tests use no API credits.
+The tests cover reranking on updated lead time, unit normalization, scope checks, incompatible boundaries, missing evidence, duplicate IDs, extraction confirmation, and persistent decision records. Tests use no API credits.
 
 ## Impact and expansion
 
 For the synthetic steel order, the recommendation shifts from 240 to 150 tCO₂e after the delivery update. The quote premium is ₹2.5 lakh; 90 tCO₂e is a **scenario comparison**, not verified abatement. Reuse the same workflow for multiple materials, sites, suppliers, and rule cards. A production pilot would measure decision time, evidence completeness, exceptions, realized purchase cost, and verified emissions versus a baseline over many orders.
+
+The UI reports evidence completeness, eligible offers, and elapsed evaluation time for each run. This is measured prototype output, not a claim of time saved. Rule cards are configuration in `data/rules.json`; editing them still requires policy-owner review and testing before production use.
 
 ## Hackathon handoff
 
